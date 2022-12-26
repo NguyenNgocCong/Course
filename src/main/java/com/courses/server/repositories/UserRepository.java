@@ -48,15 +48,15 @@ public interface UserRepository extends JpaRepository<User, Long> {
 	@Query(value="select * from User where active = ?1 and role_id = ?2", nativeQuery=true)
     Page<User> findAllByActiveAndRole(boolean status, long role, Pageable pageable);
 
-    @Query(value="SELECT COUNT(*) FROM courses.user u " +
-            "WHERE (SELECT s.setting_value FROM courses.setting s WHERE s.setting_id = u.role_id) LIKE 'ROLE_SUPPORTER'", nativeQuery=true)
+    @Query(value="SELECT COUNT(*) FROM user u " +
+            "WHERE (SELECT s.setting_value FROM setting s WHERE s.setting_id = u.role_id) LIKE 'ROLE_SUPPORTER'", nativeQuery=true)
     long countSupporter();
 
-    @Query(value="SELECT COUNT(*) FROM courses.user u " +
-            "WHERE (SELECT s.setting_value FROM courses.setting s WHERE s.setting_id = u.role_id) LIKE 'ROLE_TRAINER'", nativeQuery=true)
+    @Query(value="SELECT COUNT(*) FROM user u " +
+            "WHERE (SELECT s.setting_value FROM setting s WHERE s.setting_id = u.role_id) LIKE 'ROLE_TRAINER'", nativeQuery=true)
     long countTrainer();
 
-    @Query(value="SELECT COUNT(*) FROM courses.user u " +
-            "WHERE (SELECT s.setting_value FROM courses.setting s WHERE s.setting_id = u.role_id) LIKE 'ROLE_MARKETER'", nativeQuery=true)
+    @Query(value="SELECT COUNT(*) FROM user u " +
+            "WHERE (SELECT s.setting_value FROM setting s WHERE s.setting_id = u.role_id) LIKE 'ROLE_MARKETER'", nativeQuery=true)
     long countMakerter();
 }

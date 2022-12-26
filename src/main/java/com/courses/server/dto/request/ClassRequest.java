@@ -17,6 +17,6 @@ public class ClassRequest {
     private String branch;
     private String schedule;
     private String time;
-    private boolean online;
+    private Boolean online;
     private long supporterId;
 }

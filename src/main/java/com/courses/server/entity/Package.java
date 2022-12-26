@@ -5,7 +5,6 @@ import lombok.*;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
-import javax.persistence.Lob;
 import javax.persistence.ManyToOne;
 import javax.validation.constraints.NotEmpty;
 
@@ -19,8 +18,8 @@ public class Package extends BaseDomain{
     private String image;
     private long views;
     
-    @NotEmpty(message = "Write something for the love of Internet...")
-    @Lob
+    @NotEmpty(message = "Nhập 1 vài thông tin miêu tả...")
+    @Column(name = "description", columnDefinition = "TEXT", nullable = false)
     private String description;
     
     private boolean status;

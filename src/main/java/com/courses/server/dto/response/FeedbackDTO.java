@@ -12,6 +12,7 @@ public class FeedbackDTO {
     private PackageDTO aPackage;
     private Combo combo;
     private UserDTO user;
+    private String created_date;
 
     public FeedbackDTO(Feedback feedback) {
         body = feedback.getBody();
@@ -20,5 +21,6 @@ public class FeedbackDTO {
         if(feedback.getAPackage()!=null) aPackage = new PackageDTO(feedback.getAPackage());
         if(feedback.getCombo()!=null) combo = feedback.getCombo();
         user = new UserDTO(feedback.getUser());
+        created_date= feedback.getCreatedDate();
     }
 }

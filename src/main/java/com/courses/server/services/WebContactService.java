@@ -18,6 +18,8 @@ public interface WebContactService {
 
     void updateWebContact(String username, Long id, WebContactRequest webContactRequest);
 
+    WebContact getClassDetail(Long id);
+
     void updateStatusWebContact(String username, Long id, boolean status);
 
     void deleteWebContact(String username, Long id);

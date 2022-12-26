@@ -1,4 +1,5 @@
 package com.courses.server.controller.admin;
+
 import com.courses.server.dto.MessageResponse;
 import com.courses.server.dto.request.Params;
 import com.courses.server.dto.request.WebContactRequest;
@@ -11,6 +12,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.repository.query.Param;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
@@ -26,21 +28,20 @@ public class AdminWebContactController {
 
     @GetMapping("")
     public ResponseEntity<?> listWebContact(@RequestParam(defaultValue = "0") int page,
-                                                           @Param("keyword") String keyword,
-                                                           @Param("status") Boolean status,
-                                                           @Param("category") long category, 
-                                                           @RequestParam(defaultValue = "10")int size
-                                                           ) throws IOException{
+            @Param("keyword") String keyword,
+            @Param("status") Boolean status,
+            @Param("category") long category,
+            @RequestParam(defaultValue = "10") int size) throws IOException {
         Authen.check();
         Pageable paging = PageRequest.of(page, size);
-        
-		Params params = new Params();
-		params.setCategory(category);
-		params.setActive(status);
-		if (keyword != null && keyword.trim().length() != 0)
-			params.setKeyword(keyword);
-		else
-			params.setKeyword(null);
+
+        Params params = new Params();
+        params.setCategory(category);
+        params.setActive(status);
+        if (keyword != null && keyword.trim().length() != 0)
+            params.setKeyword(keyword);
+        else
+            params.setKeyword(null);
 
         Page<WebContact> pageWebContacts = webContactService.getWebContactList(paging, params);
 
@@ -53,9 +54,18 @@ public class AdminWebContactController {
         return ResponseEntity.ok(response);
     }
 
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_SUPPORTER', 'ROLE_TRAINER')")
+    @GetMapping("/{id}")
+    public ResponseEntity<?> getClassDetail(@PathVariable("id") Long id) {
+        Authen.check();
+        WebContact contact = webContactService.getClassDetail(id);
+
+        return ResponseEntity.ok(contact);
+    }
+
     @PutMapping("/update")
     public ResponseEntity<?> updateWebContact(@RequestParam("id") Long id,
-                                              @RequestBody WebContactRequest webContactRequest){
+            @RequestBody WebContactRequest webContactRequest) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         String username = auth.getName();
         webContactService.updateWebContact(username, id, webContactRequest);
@@ -64,7 +74,7 @@ public class AdminWebContactController {
 
     @PutMapping("/update-status")
     public ResponseEntity<?> updateWebContact(@RequestParam("id") Long id,
-                                              @RequestBody Map<String, Boolean> statusReq){
+            @RequestBody Map<String, Boolean> statusReq) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         String username = auth.getName();
         Boolean status = statusReq.get("status");
@@ -73,7 +83,7 @@ public class AdminWebContactController {
     }
 
     @DeleteMapping("/delete")
-    public ResponseEntity<?> deleteWebContact(@RequestParam("id") Long id){
+    public ResponseEntity<?> deleteWebContact(@RequestParam("id") Long id) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         String username = auth.getName();
         webContactService.deleteWebContact(username, id);

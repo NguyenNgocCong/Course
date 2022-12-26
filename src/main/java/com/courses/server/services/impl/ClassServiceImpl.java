@@ -109,7 +109,7 @@ public class ClassServiceImpl implements ClassService {
 		}
 		_class.setSupporter(supporter);
 
-		if (!classRequest.isOnline()) {
+		if (classRequest.getOnline() != null && !classRequest.getOnline()) {
 			if (classRequest.getBranch() == null) {
 				throw new BadRequestException(400, "Please input branch info");
 			}
@@ -168,6 +168,25 @@ public class ClassServiceImpl implements ClassService {
 			}
 			_class.setTrainer(trainer);
 		}
+		if (classRequest.getOnline() != null) {
+			if (!classRequest.getOnline()) {
+				if (classRequest.getBranch() == null) {
+					throw new BadRequestException(400, "Please input branch info");
+				}
+				Setting branch = null;
+				try {
+					branch = settingRepository.findByValueAndType(classRequest.getBranch(), 7).get();
+				} catch (Exception ex) {
+					ex.printStackTrace();
+				}
+				if (branch == null) {
+					throw new NotFoundException(404, "Branch  Không tồn tại!!!");
+				}
+				_class.setBranch(branch);
+			} else {
+				_class.setBranch(null);
+			}
+		}
 
 		classRepository.save(_class);
 	}
@@ -221,26 +240,32 @@ public class ClassServiceImpl implements ClassService {
 				if (params.getKeyword() == null) {
 					return classRepository.findAllRoleSupporter(supporter.getId(), paging);
 				} else {
-					return classRepository.findAllByCodeOrNameRoleSupporter(params.getKeyword(), supporter.getId(), paging);
+					return classRepository.findAllByCodeOrNameRoleSupporter(params.getKeyword(), supporter.getId(),
+							paging);
 				}
 			} else {
 				if (params.getCategory() != 0 && params.getActive() == null) {
 					if (params.getKeyword() == null) {
-						return classRepository.findAllByTrainerRoleSupporter(params.getCategory(), supporter.getId(), paging);
+						return classRepository.findAllByTrainerRoleSupporter(params.getCategory(), supporter.getId(),
+								paging);
 					} else {
-						return classRepository.findAllByTrainerAndCodeOrNameRoleSupporter(params.getKeyword(), params.getCategory(),
+						return classRepository.findAllByTrainerAndCodeOrNameRoleSupporter(params.getKeyword(),
+								params.getCategory(),
 								supporter.getId(), paging);
 					}
 				} else if (params.getCategory() == 0 && params.getActive() != null) {
 					if (params.getKeyword() == null) {
-						return classRepository.findAllByStatusRoleSupporter(params.getActive(), supporter.getId(), paging);
+						return classRepository.findAllByStatusRoleSupporter(params.getActive(), supporter.getId(),
+								paging);
 					} else {
-						return classRepository.findAllByCodeOrNameAndStatusRoleSupporter(params.getKeyword(), params.getActive(),
+						return classRepository.findAllByCodeOrNameAndStatusRoleSupporter(params.getKeyword(),
+								params.getActive(),
 								supporter.getId(), paging);
 					}
 				} else {
 					if (params.getKeyword() == null) {
-						return classRepository.findAllByTrainerAndStatusRoleSupporter(params.getActive(), params.getCategory(),
+						return classRepository.findAllByTrainerAndStatusRoleSupporter(params.getActive(),
+								params.getCategory(),
 								supporter.getId(), paging);
 					} else {
 						return classRepository.findAllByTrainerAndCodeOrNameAndStatusRoleSupporter(params.getKeyword(),
@@ -252,13 +277,13 @@ public class ClassServiceImpl implements ClassService {
 		}
 	}
 
-
 	@Override
 	public Class getClassDetail(Long id) {
 		Class _class = classRepository.findById(id).get();
 		if (_class == null) {
 			throw new NotFoundException(404, "Class  Không tồn tại!!");
 		}
+
 		return _class;
 	}
 }

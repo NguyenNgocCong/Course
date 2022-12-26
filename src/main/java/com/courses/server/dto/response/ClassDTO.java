@@ -1,12 +1,8 @@
 package com.courses.server.dto.response;
 
 import com.courses.server.entity.Class;
-import com.courses.server.entity.Expert;
 import com.courses.server.entity.Setting;
-
 import lombok.Data;
-import lombok.Getter;
-import lombok.Setter;
 
 import java.util.Date;
 

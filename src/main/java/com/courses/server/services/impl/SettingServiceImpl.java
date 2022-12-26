@@ -74,24 +74,28 @@ public class SettingServiceImpl implements SettingService {
 				return settingRepository.findAllBySetting_titleContaining(params.getKeyword(), paging);
 			}
 		} else {
-		if (params.getCategory() != 0 && params.getActive() == null) {
+			if (params.getCategory() != 0 && params.getActive() == null) {
 				if (params.getKeyword() == null) {
-					return settingRepository.findAllByType((int)params.getCategory(), paging);
+					return settingRepository.findAllByType((int) params.getCategory(), paging);
 				} else {
-					return settingRepository.findAllBySetting_titleContainingAndType(params.getKeyword(), (int)params.getCategory(), paging);
+					return settingRepository.findAllBySetting_titleContainingAndType(params.getKeyword(),
+							(int) params.getCategory(), paging);
 				}
 			} else if (params.getCategory() == 0 && params.getActive() != null) {
 				if (params.getKeyword() == null) {
 					return settingRepository.findAllByStatus(params.getActive(), paging);
 				} else {
-					return settingRepository.findAllBySetting_titleContainingAndStatus(params.getKeyword(), params.getActive(),
+					return settingRepository.findAllBySetting_titleContainingAndStatus(params.getKeyword(),
+							params.getActive(),
 							paging);
 				}
 			} else {
 				if (params.getKeyword() == null) {
-					return settingRepository.findAllByStatusAndType(params.getActive(),(int) params.getCategory(), paging);
+					return settingRepository.findAllByStatusAndType(params.getActive(), (int) params.getCategory(),
+							paging);
 				} else {
-					return settingRepository.findAllByStatusAndSetting_titleContainingAndType(params.getKeyword(), params.getActive(),(int) params.getCategory(), paging);
+					return settingRepository.findAllByStatusAndSetting_titleContainingAndType(params.getKeyword(),
+							params.getActive(), (int) params.getCategory(), paging);
 				}
 
 			}
@@ -113,6 +117,12 @@ public class SettingServiceImpl implements SettingService {
 			setting.setDisplay_order(settingRequest.getDisplay_order());
 		if (settingRequest.getStatus() != null)
 			setting.setStatus(settingRequest.getStatus());
+		if (settingRequest.getType_id() != 0) {
+
+			Type type = typeRepository.findbyType_id(settingRequest.getType_id())
+					.orElseThrow(() -> new NotFoundException(404, "Error: Type  Không tồn tại"));
+			setting.setType(type);
+		}
 		settingRepository.save(setting);
 		PermissionList.resetListPermisson(settingRepository, permissonService);
 	}
@@ -138,12 +148,11 @@ public class SettingServiceImpl implements SettingService {
 		return settingRepository.findAllByType(typeId);
 	}
 
-
 	@Override
 	public String checkRole() {
 		String role = null;
 		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-		for(GrantedAuthority rolee: auth.getAuthorities()){
+		for (GrantedAuthority rolee : auth.getAuthorities()) {
 			role = String.valueOf(settingRepository.findByValueAndType(rolee.getAuthority(), 1).get());
 		}
 		return role;

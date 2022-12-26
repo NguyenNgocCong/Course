@@ -151,27 +151,9 @@ public class WebContactServiceImpl implements WebContactService {
         Optional<WebContact> webContactFind = webContactRepository.findById(id);
         WebContact webContact = webContactFind.get();
 
-        if (webContactRequest.getFullName() != null)
-            webContact.setFullName(webContactRequest.getFullName());
-        if (webContactRequest.getEmail() != null)
-            webContact.setEmail(webContactRequest.getEmail());
-        if (webContactRequest.getPhoneNumber() != null)
-            webContact.setPhoneNumber(webContactRequest.getPhoneNumber());
-        if (webContactRequest.getMessage() != null)
-            webContact.setMessage(webContactRequest.getMessage());
-        if (webContactRequest.getCategoryId() != null) {
-            Setting category = null;
-            try {
-                category = settingRepository.findById(webContactRequest.getCategoryId()).get();
-            } catch (Exception ex) {
-                ex.printStackTrace();
-            }
-            if (category == null) {
-                throw new NotFoundException(404, "Category  Không tồn tại");
-            }
-            webContact.setCategory(category);
-        }
-        webContact.setUpdatedDate(new Timestamp(new Date().getTime()).toString());
+        if (webContactRequest.getNote() != null)
+            webContact.setNote(webContactRequest.getNote());
+      
         webContact.setSupporter(userRepository.findByUsername(auth.getName()));
         webContactRepository.save(webContact);
     }
@@ -199,4 +181,15 @@ public class WebContactServiceImpl implements WebContactService {
 
         webContactRepository.deleteById(id);
     }
+
+   
+    @Override
+	public WebContact getClassDetail(Long id) {
+		WebContact contact = webContactRepository.findById(id).get();
+		if (contact == null) {
+			throw new NotFoundException(404, "Thông tin hỗ trợ  Không tồn tại!!");
+		}
+
+		return contact;
+	}
 }

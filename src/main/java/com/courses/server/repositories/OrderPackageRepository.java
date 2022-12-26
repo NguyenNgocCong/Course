@@ -23,21 +23,21 @@ public interface OrderPackageRepository extends JpaRepository<OrderPackage, Long
     OrderPackage findByActivationKey(String code);
 
     @Modifying 
-    @Query(value = "SELECT op.* FROM courses.`order` as o join order_package as op on o.id = op.order_id where o.customer_id = ?2 and o.class_id = ?1",nativeQuery = true) // if want to write nativequery then mask nativeQuery  as true
+    @Query(value = "SELECT op.* FROM `order` as o join order_package as op on o.id = op.order_id where o.customer_id = ?2 and o.class_id = ?1",nativeQuery = true) // if want to write nativequery then mask nativeQuery  as true
     List<OrderPackage> checkClassExistCustomer(Long class_id, Long customer_id);
 
     @Modifying 
-    @Query(value = "SELECT op.* FROM courses.`order` as o join order_package as op on o.id = op.order_id where o.user_id = ?2 and o.class_id = ?1",nativeQuery = true) // if want to write nativequery then mask nativeQuery  as true
+    @Query(value = "SELECT op.* FROM `order` as o join order_package as op on o.id = op.order_id where o.user_id = ?2 and o.class_id = ?1",nativeQuery = true) // if want to write nativequery then mask nativeQuery  as true
     List<OrderPackage> checkClassExistUser(Long class_id, Long userId);
 
     @Modifying 
-    @Query(value = "DELETE FROM courses.order_package WHERE id = ?1",nativeQuery = true) 
+    @Query(value = "DELETE FROM order_package WHERE id = ?1",nativeQuery = true) 
     int deleteProduct(Long id); 
 
-    @Query(value="SELECT op.* FROM courses.`order` as o join order_package as op on o.id = op.order_id where o.status = 3", nativeQuery=true)
+    @Query(value="SELECT op.* FROM `order` as o join order_package as op on o.id = op.order_id where o.status = 3", nativeQuery=true)
     List<OrderPackage> countSoldOut();
 
-    @Query(value="SELECT * FROM courses.order_package WHERE order_id = ?1", nativeQuery=true)
+    @Query(value="SELECT * FROM order_package WHERE order_id = ?1", nativeQuery=true)
     List<OrderPackage> countProduct(Long order_id);
 
 }

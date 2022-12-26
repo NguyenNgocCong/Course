@@ -184,10 +184,10 @@ public class UserServiceImpl implements UserService {
 
 	public void updatePassword(User customer, String newPassword) {
 		if (newPassword == null || newPassword == "") {
-			throw new BadRequestException(1100, "password is required");
+			throw new BadRequestException(1100, "Vui lòng nhập mật khẩu");
 		} else if (!newPassword.matches("^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&_])[A-Za-z\\d@$!%*?&_]{8,20}$")) {
 			throw new BadRequestException(1101,
-					"password invalid, Password must be at least 8 characters with at least 1 special character 1 uppercase letter 1 lowercase letter and 1 number!");
+					"Sai định dạng mật khẩu vui lòng nhập ít nhất 8 kí tự có ít nhất 1 chữ hoa, 1 chữ thường, 1 số và 1 kí tự đặc biệt");
 		}
 
 		BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();

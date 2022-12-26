@@ -57,9 +57,9 @@ public interface PostRepository extends JpaRepository<Post, Long> {
 	@Query(value = "select * from Post where status = ?1 and category_id = ?2 and user_id = ?3", nativeQuery = true)
 	Page<Post> findAllByAuthorAndStatusAndCategory(int status, long category, long user_id, Pageable pageable);
 
-	@Query(value = "SELECT * FROM courses.post order by views desc LIMIT 0, ?1", nativeQuery = true)
+	@Query(value = "SELECT * FROM post order by views desc LIMIT 0, ?1", nativeQuery = true)
 	List<Post> findTopByOrderByViewsDesc(int top);
 
-	@Query(value = "SELECT * FROM courses.post order by created_date desc LIMIT 0, ?1", nativeQuery = true)
+	@Query(value = "SELECT * FROM post order by created_date desc LIMIT 0, ?1", nativeQuery = true)
 	List<Post> findTopRecent(int top);
 }

@@ -47,7 +47,7 @@ public class AuthController {
 
         senderService.sendEmail(registerDTO.getEmail(), subject, content);
 
-        return ResponseEntity.ok(new MessageResponse("Register success. Please check email verify!!!"));
+        return ResponseEntity.ok(new MessageResponse("Đăng ký thành công, vui lòng kiểm ra email để xem thông tin xác thực!!!"));
     }
 
     @GetMapping("/verify")
@@ -56,13 +56,13 @@ public class AuthController {
         User user = userService.getByRegisterToken(token);
 
         if(user.isActive()){
-            return TemplateSendMail.getError("Account has already active!!!", "https://lms.nextin.com.vn", "FCourses");
+            return TemplateSendMail.getError("Account has already active!!!", "https://lms.nextin.com.vn", "LRS Education");
         }
         if(Duration.between(user.getTimeRegisterToken(), LocalDateTime.now()).toMinutes()>10){
             return TemplateSendMail.getError("Authentication timeout. Please register again!", "https://lms.nextin.com.vn/register", "Register");
         }
         if (user == null) {
-            return TemplateSendMail.getError("Token wrong!!!", "https://lms.nextin.com.vn", "FCourses");
+            return TemplateSendMail.getError("Token wrong!!!", "https://lms.nextin.com.vn", "LRS Education");
         }
 
         userService.verifyRegister(user);
@@ -85,7 +85,7 @@ public class AuthController {
 
         senderService.sendEmail(email, subject, content);
 
-        return ResponseEntity.ok(new MessageResponse("Fotgot password success. Please check email!!!"));
+        return ResponseEntity.ok(new MessageResponse("Gửi yêu cầu quên mật khẩu thành công, vui lòng check email của bạn!!!"));
     }
 
     @PostMapping("/reset-password")
@@ -93,16 +93,16 @@ public class AuthController {
                                                   @RequestParam("token") String token,
                                                   @RequestBody Map<String, String> forgot) {
 
+        System.out.println(token);
         User user = userService.getByResetPasswordToken(token);
         String password = forgot.get("password");
-
+        System.out.println(password);
         if (user == null) {
-            throw new BadRequestException(1402, "token wrong");
+            throw new BadRequestException(1402, "Sai mã token");
         }
-
         userService.updatePassword(user, password);
 
-        return ResponseEntity.ok(new MessageResponse("Reset password success"));
+        return ResponseEntity.ok(new MessageResponse("Đặt lại mật khẩu thành công"));
     }
 
 }

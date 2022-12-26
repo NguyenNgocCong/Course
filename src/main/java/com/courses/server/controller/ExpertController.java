@@ -43,7 +43,7 @@ public class ExpertController {
 	}
 
 	@GetMapping("")
-	@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER')")
+	@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_SUPPORTER')")
 	public ResponseEntity<?> getAllExpert(@Param("keyword") String keyword, @RequestParam(defaultValue = "0") int page,
 			@RequestParam(defaultValue = "10") int size) throws IOException {
 		Authen.check();

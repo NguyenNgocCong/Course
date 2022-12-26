@@ -12,6 +12,7 @@ public class WebContact extends BaseDomain {
     private String email;
     private String phoneNumber;
     private String message;
+    private String note;
     private boolean status;
 
     @ManyToOne

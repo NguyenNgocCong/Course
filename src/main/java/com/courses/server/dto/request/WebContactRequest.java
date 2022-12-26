@@ -12,5 +12,6 @@ public class WebContactRequest {
     private String email;
     private String phoneNumber;
     private String message;
+    private String note;
     private Long categoryId;
 }

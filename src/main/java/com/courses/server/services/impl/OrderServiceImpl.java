@@ -943,7 +943,7 @@ public class OrderServiceImpl implements OrderService {
                         traineeRepository.save(trainee);
                     } else {
                         senderService.sendEmail(order.getCustomer().getEmail(), "Code verify course",
-                                "Course code " + op.get_package().getTitle() + " is:" + code);
+                                "Course code " + op.get_package() != null ? op.get_package().getTitle() : op.get_combo().getTitle() + " is:" + code);
                     }
                 } else {
                     if (order.getAClass() != null) {
@@ -961,7 +961,7 @@ public class OrderServiceImpl implements OrderService {
                         senderService.sendEmail(order.getUser().getEmail(), subject, content);
                     } else {
                         senderService.sendEmail(order.getUser().getEmail(), "Code verify course",
-                                "Course code " + op.get_package().getTitle() + " is:" + code);
+                                "Course code " + op.get_package() != null ? op.get_package().getTitle() : op.get_combo().getTitle() + " is:" + code);
                     }
                 }
             }

@@ -5,7 +5,6 @@ import org.hibernate.validator.constraints.Length;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
-import javax.persistence.Lob;
 import javax.persistence.ManyToOne;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
@@ -17,11 +16,11 @@ public class Post extends BaseDomain {
 
     @Length(min = MIN_TITLE_LENGTH, message = "Title must be at least " + MIN_TITLE_LENGTH + " characters long")
     @NotEmpty(message = "Please enter the title")
-    @Column(name = "title", nullable = false)
+    @Column(name = "title", columnDefinition = "TEXT", nullable = true)
     private String title;
 
-    @NotEmpty(message = "Write something for the love of Internet...")
-    @Lob
+    @NotEmpty(message = "Please enter the body")
+    @Column(name = "body", columnDefinition = "TEXT", nullable = true)
     private String body;
 
     @NotNull
