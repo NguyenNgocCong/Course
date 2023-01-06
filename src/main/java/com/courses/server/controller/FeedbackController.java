@@ -11,6 +11,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
@@ -29,25 +30,45 @@ public class FeedbackController {
         Authen.check();
         feedbackService.create(req);
 
-        return ResponseEntity.ok(new MessageResponse("Create feedback is success"));
+        return ResponseEntity.ok(new MessageResponse("Tạo phản hồi thành công"));
     }
 
     @PutMapping("/update")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_SUPPORTER', 'ROLE_MARKETER')")
     public ResponseEntity<?> update(@RequestParam("id") Long id,
             @RequestBody FeedbackRequest req) {
         Authen.check();
         feedbackService.update(id, req);
 
-        return ResponseEntity.ok(new MessageResponse("Update feedback is success"));
+        return ResponseEntity.ok(new MessageResponse("Cập nhật phản hồi thành công"));
     }
 
     @DeleteMapping("/delete")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_SUPPORTER', 'ROLE_MARKETER')")
     public ResponseEntity<?> delete(@RequestParam("id") Long id) {
         Authen.check();
         feedbackService.delete(id);
 
-        return ResponseEntity.ok(new MessageResponse("Delete feedback is success"));
+        return ResponseEntity.ok(new MessageResponse("Xóa phản hồi thành công"));
     }
+    
+    @PostMapping("/create-admin")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_SUPPORTER', 'ROLE_MARKETER')")
+    public ResponseEntity<?> createAdmin(@RequestBody FeedbackRequest req) {
+        Authen.check();
+        feedbackService.createAdmin(req);
+
+        return ResponseEntity.ok(new MessageResponse("Thêm phản hồi thành công"));
+    }
+
+    @GetMapping("/getById/{id}")
+	@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER')")
+	public ResponseEntity<?> getDetail(@PathVariable("id") Long id) {
+		Authen.check();
+		Feedback expert = feedbackService.getDetail(id);
+
+		return ResponseEntity.ok(new FeedbackDTO(expert));
+	}
 
     @GetMapping("/list-expert")
     public ResponseEntity<?> listExpert(@RequestParam(defaultValue = "0") int page,

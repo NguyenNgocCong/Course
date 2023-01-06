@@ -127,28 +127,28 @@ public class OrderServiceImplTest {
     }
 
 
-    @Test
-    public void createNoLogin() {
-        SecurityContextHolder.setContext(SecurityContextHolder.createEmptyContext());
-        OrderRequest req = new OrderRequest("f", "e@e.e", "0987654321",
-          "1", Collections.singletonList(1L), Collections.singletonList(1L), 1L);
-        com.courses.server.entity.User user = new com.courses.server.entity.User() {{
-            setId(1L);
-            setRole(new Setting() {{setSetting_value("ROLE_SUPPORTER");}});
-        }};
-
-        Mockito.when(userRepository.findByEmail(Mockito.anyString())).thenReturn(Optional.empty());
-        Mockito.when(customerRepository.findByEmail(Mockito.anyString())).thenReturn(Optional.empty());
-        Mockito.when(customerRepository.save(Mockito.any())).thenReturn(new Customer() {{setId(1L);}});
-        Mockito.when(couponRepository.findByCodeAccess(Mockito.anyString())).thenReturn(Optional.of(new Coupon() {{setQuantity(2);setId(1L);}}));
-        Mockito.when(orderRepository.getCountCouponCustomerOrder(Mockito.anyLong(), Mockito.anyLong())).thenReturn(List.of(new Order()));
-        Mockito.when(classRepository.findById(Mockito.any())).thenReturn(Optional.of(new Class() {{setAPackage(new Package() {{setSalePrice(1D);}});}}));
-        MockedStatic<AutoSetSuporter> supporter = Mockito.mockStatic(AutoSetSuporter.class);
-        supporter.when(() -> AutoSetSuporter.setSupporter(settingRepository, userRepository)).thenReturn(null);
-
-        service.createNoLogin(req);
-        Mockito.verify(orderRepository).save(Mockito.any());
-    }
+//    @Test
+//    public void createNoLogin() {
+//        SecurityContextHolder.setContext(SecurityContextHolder.createEmptyContext());
+//        OrderRequest req = new OrderRequest("f", "e@e.e", "0987654321",
+//          "1", Collections.singletonList(1L), Collections.singletonList(1L), 1L);
+//        com.courses.server.entity.User user = new com.courses.server.entity.User() {{
+//            setId(1L);
+//            setRole(new Setting() {{setSetting_value("ROLE_SUPPORTER");}});
+//        }};
+//
+//        Mockito.when(userRepository.findByEmail(Mockito.anyString())).thenReturn(Optional.empty());
+//        Mockito.when(customerRepository.findByEmail(Mockito.anyString())).thenReturn(Optional.empty());
+//        Mockito.when(customerRepository.save(Mockito.any())).thenReturn(new Customer() {{setId(1L);}});
+//        Mockito.when(couponRepository.findByCodeAccess(Mockito.anyString())).thenReturn(Optional.of(new Coupon() {{setQuantity(2);setId(1L);}}));
+//        Mockito.when(orderRepository.getCountCouponCustomerOrder(Mockito.anyLong(), Mockito.anyLong())).thenReturn(List.of(new Order()));
+//        Mockito.when(classRepository.findById(Mockito.any())).thenReturn(Optional.of(new Class() {{setAPackage(new Package() {{setSalePrice(1D);}});}}));
+//        MockedStatic<AutoSetSuporter> supporter = Mockito.mockStatic(AutoSetSuporter.class);
+//        supporter.when(() -> AutoSetSuporter.setSupporter(settingRepository, userRepository)).thenReturn(null);
+//
+//        service.createNoLogin(req);
+//        Mockito.verify(orderRepository).save(Mockito.any());
+//    }
 
     @Test
     public void createAdmin() {

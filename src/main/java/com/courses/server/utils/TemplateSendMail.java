@@ -137,7 +137,7 @@ public class TemplateSendMail {
                 "        overflow: hidden;\n" +
                 "      \"\n" +
                 "    >\n" +
-                "      We're thrilled to have you here! Get ready to dive into your new account.\n" +
+                "      Chúng tôi rất vui mừng khi có bạn ở đây! Hãy sẵn sàng để đi sâu vào tài khoản mới của bạn.\n" +
                 "    </div>\n" +
                 "    <table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" width=\"100%\">\n" +
                 "      <!-- LOGO -->\n" +
@@ -222,7 +222,7 @@ public class TemplateSendMail {
                 "                \"\n" +
                 "              >\n" +
                 "                <p style=\"margin: 0\">\n" +
-                "                  Welcome to the LRS education. " + description + " Just hit the button below.\n" +
+                "                  Chào mừng bạn đến với LRS education. " + description + " Bạn chỉ cần nhấn vào nút bên dưới.\n" +
                 "                </p>\n" +
                 "              </td>\n" +
                 "            </tr>\n" +
@@ -282,8 +282,7 @@ public class TemplateSendMail {
                 "                \"\n" +
                 "              >\n" +
                 "                <p style=\"margin: 0\">\n" +
-                "                  If that doesn't work, copy and paste the following link in\n" +
-                "                  your browser:\n" +
+                "                  Nếu không hoạt động bạn vui lòng truy cập vào đường linh sau:\n" +
                 "                </p>\n" +
                 "              </td>\n" +
                 "            </tr>\n" +
@@ -322,8 +321,8 @@ public class TemplateSendMail {
                 "                \"\n" +
                 "              >\n" +
                 "                <p style=\"margin: 0\">\n" +
-                "                  If you have any questions, just reply to this\n" +
-                "                  email&mdash;we're always happy to help out.\n" +
+                "                  Nếu bạn có bất cứ câu hỏi nào, vui lòng trả lời qua mail này\n" +
+                "                  &mdash;Chúng tôi rất vui nếu nhận được câu hỏi từ bạn.\n" +
                 "                </p>\n" +
                 "              </td>\n" +
                 "            </tr>\n" +
@@ -341,7 +340,7 @@ public class TemplateSendMail {
                 "                  line-height: 25px;\n" +
                 "                \"\n" +
                 "              >\n" +
-                "                <p style=\"margin: 0\">Cheers,<br />LRS education</p>\n" +
+                "                <p style=\"margin: 0\">Cảm ơn,<br />LRS education</p>\n" +
                 "              </td>\n" +
                 "            </tr>\n" +
                 "          </table>\n" +
@@ -386,7 +385,7 @@ public class TemplateSendMail {
                 "                </h2>\n" +
                 "                <p style=\"margin: 0\">\n" +
                 "                  <a\n" +
-                "                    href=\"https://www.facebook.com/cong.nguyenngoc.50159\"\n" +
+                "                    href=\"https://www.facebook.com/nguyenvanhung13\"\n" +
                 "                    target=\"_blank\"\n" +
                 "                    style=\"color: #ffa73b\"\n" +
                 "                    >We&rsquo;re here to help you out</a\n" +
@@ -439,7 +438,7 @@ public class TemplateSendMail {
                 "</html>\n";
     }
 
-    public static String getContentCourse(String link, String title, String description) {
+    public static String getContentCourse(String link, String title, String description, String category, String action) {
         return "<!DOCTYPE html>\n" +
                 "<html>\n" +
                 "  <head>\n" +
@@ -575,7 +574,7 @@ public class TemplateSendMail {
                 "        overflow: hidden;\n" +
                 "      \"\n" +
                 "    >\n" +
-                "      We're thrilled to have you here! Get ready to dive into your new account.\n" +
+                title + ".\n" +
                 "    </div>\n" +
                 "    <table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" width=\"100%\">\n" +
                 "      <!-- LOGO -->\n" +
@@ -660,7 +659,7 @@ public class TemplateSendMail {
                 "                \"\n" +
                 "              >\n" +
                 "                <p style=\"margin: 0\">\n" +
-                "                  Chào mừng bạn đến với LRS education. " + description + "\n" +
+                "                  Chào mừng bạn đến với LRS education. " + category + "\n" + " của bạn đã được " + action + " thành công" +
                 "                </p>\n" +
                 "              </td>\n" +
                 "            </tr>\n" +
@@ -695,7 +694,7 @@ public class TemplateSendMail {
                 "                                border: 1px solid #ffa73b;\n" +
                 "                                display: inline-block;\n" +
                 "                              \"\n" +
-                "                              > " + title + " </a\n" +
+                "                              > Đăng nhập </a\n" +
                 "                            >\n" +
                 "                          </td>\n" +
                 "                        </tr>\n" +
@@ -719,9 +718,7 @@ public class TemplateSendMail {
                 "                  line-height: 25px;\n" +
                 "                \"\n" +
                 "              >\n" +
-                "                <p style=\"margin: 0\">\n" +
-                "                  If that doesn't work, copy and paste the following link in\n" +
-                "                  your browser:\n" +
+                "                <p style=\"margin: 0\">\n" + description + "\n" +
                 "                </p>\n" +
                 "              </td>\n" +
                 "            </tr>\n" +
@@ -739,11 +736,6 @@ public class TemplateSendMail {
                 "                  line-height: 25px;\n" +
                 "                \"\n" +
                 "              >\n" +
-                "                <p style=\"margin: 0\">\n" +
-                "                  <a href=\"" + link + "\" target=\"_blank\" style=\"color: #ffa73b\"\n" +
-                "                    >" + link + "</a\n" +
-                "                  >\n" +
-                "                </p>\n" +
                 "              </td>\n" +
                 "            </tr>\n" +
                 "            <tr>\n" +
@@ -760,8 +752,8 @@ public class TemplateSendMail {
                 "                \"\n" +
                 "              >\n" +
                 "                <p style=\"margin: 0\">\n" +
-                "                  If you have any questions, just reply to this\n" +
-                "                  email&mdash;we're always happy to help out.\n" +
+                "                   Nếu bạn có bất kì câu hỏi nào, Vui lòng trả lời qua mail này\n" +
+                "                  &mdash;Chúng tôi rất vui khi nhân được câu hỏi từ bạn.\n" +
                 "                </p>\n" +
                 "              </td>\n" +
                 "            </tr>\n" +
@@ -779,7 +771,7 @@ public class TemplateSendMail {
                 "                  line-height: 25px;\n" +
                 "                \"\n" +
                 "              >\n" +
-                "                <p style=\"margin: 0\">Cheers,<br />LRS education</p>\n" +
+                "                <p style=\"margin: 0\">Cảm ơn,<br />LRS education</p>\n" +
                 "              </td>\n" +
                 "            </tr>\n" +
                 "          </table>\n" +

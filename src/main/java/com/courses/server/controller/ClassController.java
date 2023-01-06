@@ -103,7 +103,7 @@ return ResponseEntity.ok(new ClassDTO(_class));
 		Authen.check();
 		classService.addClass(classRequest);
 
-		return ResponseEntity.ok(new MessageResponse("Create class success"));
+		return ResponseEntity.ok(new MessageResponse("Tạo lớp học thành công"));
 	}
 
 	@PostMapping("/update")
@@ -112,6 +112,6 @@ return ResponseEntity.ok(new ClassDTO(_class));
 		Authen.check();
 		classService.updateCLass(id, classRequest);
 
-		return ResponseEntity.ok(new MessageResponse("Update class success"));
+		return ResponseEntity.ok(new MessageResponse("Cập nhật lớp học thành công"));
 	}
 }

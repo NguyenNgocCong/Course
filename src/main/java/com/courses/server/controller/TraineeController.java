@@ -32,7 +32,7 @@ public class TraineeController {
         Authen.check();
         traineeService.create(req, request);
 
-        return ResponseEntity.ok(new MessageResponse("Create trainee success"));
+        return ResponseEntity.ok(new MessageResponse(" Tạo học viên thành công"));
     }
 
     @PutMapping("/update")
@@ -42,7 +42,7 @@ public class TraineeController {
         Authen.check();
         traineeService.update(id, req);
 
-        return ResponseEntity.ok(new MessageResponse("Update trainee success"));
+        return ResponseEntity.ok(new MessageResponse("Cập nhật học viên thành công"));
     }
 
     @DeleteMapping("/delete")
@@ -51,7 +51,7 @@ public class TraineeController {
         Authen.check();
         traineeService.delete(id);
 
-        return ResponseEntity.ok(new MessageResponse("Delete trainee success"));
+        return ResponseEntity.ok(new MessageResponse("Xóa học viên thành công"));
     }
 
     @GetMapping("")

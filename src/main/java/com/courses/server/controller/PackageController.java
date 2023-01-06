@@ -43,7 +43,7 @@ public class PackageController {
 
         packageService.create(req, image);
 
-        return ResponseEntity.ok(new MessageResponse("Create package success"));
+        return ResponseEntity.ok(new MessageResponse("Tạo khóa học thành công"));
     }
 
     @PutMapping(value = "/update", headers = { "content-type=multipart/mixed", "content-type=multipart/form-data" })
@@ -55,7 +55,7 @@ public class PackageController {
         PackageReq req = mapper.readValue(data, PackageReq.class);
         packageService.update(id, req, image);
 
-        return ResponseEntity.ok(new MessageResponse("Update package success"));
+        return ResponseEntity.ok(new MessageResponse("Cập nhật khóa học thành công"));
     }
 
     @DeleteMapping("/delete")
@@ -64,7 +64,7 @@ public class PackageController {
         Authen.check();
         packageService.delete(id);
 
-        return ResponseEntity.ok(new MessageResponse("Delete package success"));
+        return ResponseEntity.ok(new MessageResponse("Xóa khóa học thành công"));
     }
 
     @GetMapping("")

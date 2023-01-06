@@ -41,11 +41,11 @@ public class UserServiceImplTest {
   public void loginAccount_shouldWork() {
     Mockito.when(userRepository.existsByEmail(Mockito.any())).thenReturn(true);
     Authentication authentication = new UsernamePasswordAuthenticationToken(
-      new UserDetailsImpl(1L, "u", "e@e.e", "1", true, Collections.emptyList()), null);
+            new UserDetailsImpl(1L, "", "Admin@gmail.com", "Admin1234@", true, Collections.emptyList()), null);
     Mockito.when(authenticationManager.authenticate(Mockito.any())).thenReturn(authentication);
     Mockito.when(jwtUtils.generateJwtToken(authentication)).thenReturn("jwt");
 
-    JwtResponse jwtResponse = service.loginAccount("", "");
+    JwtResponse jwtResponse = service.loginAccount("Admin@gmail.com", "Admin1234@");
 
     Assertions.assertThat(jwtResponse.getAccessToken()).isEqualTo("jwt");
   }
@@ -53,9 +53,9 @@ public class UserServiceImplTest {
   @Test
   public void updatePassword_shouldWork() {
     User customer = new User();
-    service.updatePassword(customer, "sS%5hhhh");
+    service.updatePassword(customer, "1234Admin@");
 
-    Assertions.assertThat(new BCryptPasswordEncoder().matches("sS%5hhhh", customer.getPassword())).isTrue();
+    Assertions.assertThat(new BCryptPasswordEncoder().matches("1234Admin@", customer.getPassword())).isTrue();
   }
 
 }

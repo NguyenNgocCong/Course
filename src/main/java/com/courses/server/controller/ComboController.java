@@ -37,7 +37,7 @@ public class ComboController {
         ComboRequest req = mapper.readValue(data, ComboRequest.class);
         comboService.create(req, image);
 
-        return ResponseEntity.ok(new MessageResponse("Create combo success"));
+        return ResponseEntity.ok(new MessageResponse("Tạo combo thành công"));
     }
 
     @PutMapping("/update")
@@ -49,7 +49,7 @@ public class ComboController {
         ComboRequest req = mapper.readValue(data, ComboRequest.class);
         comboService.update(id, req, image);
 
-        return ResponseEntity.ok(new MessageResponse("Update combo success"));
+        return ResponseEntity.ok(new MessageResponse("Cập nhật combo thành công"));
     }
 
     @DeleteMapping("/delete")
@@ -57,7 +57,7 @@ public class ComboController {
         Authen.check();
         comboService.delete(id);
 
-        return ResponseEntity.ok(new MessageResponse("Delete combo success"));
+        return ResponseEntity.ok(new MessageResponse("Xóa combo thành công"));
     }
 
     @GetMapping("")

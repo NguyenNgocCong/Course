@@ -9,6 +9,8 @@ import org.springframework.stereotype.Service;
 @Service
 public interface FeedbackService {
     void create(FeedbackRequest req);
+    
+    void createAdmin(FeedbackRequest req);
 
     void update(Long id, FeedbackRequest req);
 

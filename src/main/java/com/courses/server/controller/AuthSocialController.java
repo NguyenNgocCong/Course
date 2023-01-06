@@ -56,7 +56,7 @@ public class AuthSocialController {
     public JwtResponse loginGoogle(HttpServletRequest request) throws ClientProtocolException, IOException {
         String code = request.getParameter("code");
         if (code == null || code.isEmpty()) {
-            throw new BadRequestException(1402, "token wrong");
+            throw new BadRequestException(1402, "Sai mã token");
         }
 
         String[] chunks = code.split("\\.");

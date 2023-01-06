@@ -78,19 +78,20 @@ public class SubjectController {
     }
 
     @PostMapping("/create")
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN')")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER')")
+
     public ResponseEntity<?> createSubject(@RequestBody SubjectRequest subjectRequeste) {
         subjectService.addSubject(subjectRequeste);
 
-        return ResponseEntity.ok(new MessageResponse("Crete subject success!"));
+        return ResponseEntity.ok(new MessageResponse(" Tạo môn học thành công!"));
     }
 
     @PutMapping("/update")
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN')")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER')")
     public ResponseEntity<?> updateSubject(@Param("id") Long id, @RequestBody SubjectRequest subjectRequest) {
         subjectService.updateSubject(id, subjectRequest);
 
-        return ResponseEntity.ok(new MessageResponse("Update subject success!"));
+        return ResponseEntity.ok(new MessageResponse("Cập nhật môn học thành công!"));
     }
 
     @PutMapping("/manager-update")
@@ -98,6 +99,6 @@ public class SubjectController {
     public ResponseEntity<?> managerUpdateSubject(@RequestBody ManagerSubjectRequest subjectRequest) {
         subjectService.managerUpdateSubject(subjectRequest);
 
-        return ResponseEntity.ok(new MessageResponse("Update subject success!"));
+        return ResponseEntity.ok(new MessageResponse("Cập nhật môn học thành công!"));
     }
 }

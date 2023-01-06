@@ -107,14 +107,32 @@ public class FeedbackServiceImpl implements FeedbackService {
                 throw new NotFoundException(404, "Combo  Không tồn tại");
             feedback.setCombo(combo);
             feedback.setStatus(3);
-        } else
-            feedback.setStatus(0);
+        }
 
         feedbackRepository.save(feedback);
     }
 
     @Override
+    public void createAdmin(FeedbackRequest req) {
+        if (req.getBody() == null)
+            throw new BadRequestException(400, "Vui lòng nhập bình luận");
+        if (req.getEmail() == null)
+            throw new BadRequestException(400, "Vui lòng nhập email");
+        Feedback feedback = new Feedback();
+        if (req.getVote() >= 1 && req.getVote() <= 5)
+            feedback.setVote(req.getVote());
+        User user = userRepository.findByEmail(req.getEmail()).orElse(null);
+        if (user == null)
+            throw new BadRequestException(400, "Người dùng không tồn tại");
+        feedback.setBody(req.getBody());
+        feedback.setUser(user);
+        feedback.setStatus(0);
+        feedbackRepository.save(feedback);
+    }
+
+    @Override
     public void update(Long id, FeedbackRequest req) {
+
         Feedback feedback = null;
         try {
             feedback = feedbackRepository.findById(id).get();
@@ -122,18 +140,17 @@ public class FeedbackServiceImpl implements FeedbackService {
             ex.printStackTrace();
         }
         if (feedback == null)
-            throw new NotFoundException(404, "Feedback  Không tồn tại");
-
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        String username = auth.getName();
-        User user = userRepository.findByUsername(username);
-        if (user.getId() != feedback.getUser().getId()) {
-            throw new BadRequestException(400, "This comment is not your");
-        }
+            throw new NotFoundException(404, "Phản hồi Không tồn tại");
 
         if (req.getBody() != null)
             feedback.setBody(req.getBody());
-        if (req.getVote() > 0 || req.getVote() <= 5)
+        if (req.getEmail() != null) {
+            User user = userRepository.findByEmail(req.getEmail()).orElse(null);
+            if (user == null)
+                throw new BadRequestException(400, "Người dùng không tồn tại");
+            feedback.setUser(user);
+        }
+        if (req.getVote() >= 1 && req.getVote() <= 5)
             feedback.setVote(req.getVote());
 
         feedbackRepository.save(feedback);
@@ -149,13 +166,6 @@ public class FeedbackServiceImpl implements FeedbackService {
         }
         if (feedback == null)
             throw new NotFoundException(404, "Feedback  Không tồn tại");
-
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        String username = auth.getName();
-        User user = userRepository.findByUsername(username);
-        if (user.getId() != feedback.getUser().getId()) {
-            throw new BadRequestException(400, "This comment is not your");
-        }
 
         feedbackRepository.delete(feedback);
     }

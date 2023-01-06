@@ -1,6 +1,7 @@
 D:\Course\server\Course\src\main\java\com\courses\server\dto\request\WebContactRequest.java
 D:\Course\server\Course\src\main\java\com\courses\server\exceptions\UnauthorizedException.java
 D:\Course\server\Course\src\main\java\com\courses\server\services\WebContactService.java
+D:\Course\server\Course\src\main\java\com\courses\server\dto\response\DashboardChartBar.java
 D:\Course\server\Course\src\main\java\com\courses\server\entity\ComboPackageKey.java
 D:\Course\server\Course\src\main\java\com\courses\server\controller\admin\AdminRoleController.java
 D:\Course\server\Course\src\main\java\com\courses\server\entity\ERole.java
@@ -28,6 +29,7 @@ D:\Course\server\Course\src\main\java\com\courses\server\controller\PostControll
 D:\Course\server\Course\src\main\java\com\courses\server\repositories\ComboRepository.java
 D:\Course\server\Course\src\main\java\com\courses\server\dto\response\PostDTO.java
 D:\Course\server\Course\src\main\java\com\courses\server\services\impl\PermissionServiceImpl.java
+D:\Course\server\Course\src\main\java\com\courses\server\dto\response\DashboardChartBarDto.java
 D:\Course\server\Course\src\main\java\com\courses\server\exceptions\MyFileNotFoundException.java
 D:\Course\server\Course\src\main\java\com\courses\server\repositories\CustomerRepository.java
 D:\Course\server\Course\src\main\java\com\courses\server\services\impl\SlideServiceImpl.java
@@ -153,6 +155,7 @@ D:\Course\server\Course\src\main\java\com\courses\server\dto\request\PostReq.jav
 D:\Course\server\Course\src\main\java\com\courses\server\dto\request\UserUpdateRequest.java
 D:\Course\server\Course\src\main\java\com\courses\server\entity\BaseDomain.java
 D:\Course\server\Course\src\main\java\com\courses\server\repositories\TraineeRepository.java
+D:\Course\server\Course\src\main\java\com\courses\server\dto\response\DashboardDoughnut.java
 D:\Course\server\Course\src\main\java\com\courses\server\entity\Package.java
 D:\Course\server\Course\src\main\java\com\courses\server\config\ApplicationConfig.java
 D:\Course\server\Course\src\main\java\com\courses\server\entity\User.java

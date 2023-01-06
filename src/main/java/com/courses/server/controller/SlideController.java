@@ -57,7 +57,7 @@ public class SlideController {
         ObjectMapper mapper = new ObjectMapper();
         SlideReq req = mapper.readValue(data, SlideReq.class);
         slideService.create(req ,image);
-        return ResponseEntity.ok(new MessageResponse("Create slide success"));
+        return ResponseEntity.ok(new MessageResponse("Tạo slide thành công"));
     }
 
     @PutMapping("/update")
@@ -69,7 +69,7 @@ public class SlideController {
         ObjectMapper mapper = new ObjectMapper();
         SlideReq req = mapper.readValue(data, SlideReq.class);
         slideService.update(id, req, image);
-        return ResponseEntity.ok(new MessageResponse("Update slide success"));
+        return ResponseEntity.ok(new MessageResponse("Cập nhật slide thành công"));
     }
 
     @DeleteMapping("/delete")
@@ -77,7 +77,7 @@ public class SlideController {
     public ResponseEntity<?> deleteSlide(@RequestParam("id")Long id) {
         Authen.check();
         slideService.delete(id);
-        return ResponseEntity.ok(new MessageResponse("Delete slide success"));
+        return ResponseEntity.ok(new MessageResponse("Xóa slide thành công"));
     }
 
     @GetMapping("/{id}")

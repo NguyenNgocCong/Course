@@ -15,8 +15,6 @@ import com.courses.server.utils.RandomCode;
 import com.courses.server.utils.TemplateSendMail;
 import com.courses.server.utils.Utility;
 import net.bytebuddy.utility.RandomString;
-
-import org.apache.commons.lang3.ObjectUtils.Null;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -75,7 +73,7 @@ public class OrderServiceImpl implements OrderService {
     @Override
     public void addProductOrder(ProductOrderRequest req) {
         if (req.getComboId() == null && req.getPackageId() == null)
-            throw new BadRequestException(400, "Please add package or combo");
+            throw new BadRequestException(400, "Vui lòng chọn sản phẩm");
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         User user = userRepository.findByUsername(auth.getName());
 
@@ -231,7 +229,7 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public void createNoLogin(OrderRequest req) {
+    public void createNoLogin(OrderRequest req, HttpServletRequest request) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         Order order = new Order();
         if (auth != null) {
@@ -239,13 +237,13 @@ public class OrderServiceImpl implements OrderService {
             order.setUser(user);
         } else {
             if (req.getFullName() == null || req.getEmail() == null || req.getMobile() == null) {
-                throw new BadRequestException(400, "Please input full info");
+                throw new BadRequestException(400, "Vui lòng nhập đủ thông tin");
             }
             User user = userRepository.findByEmail(req.getEmail()).orElse(null);
             if (user == null) {
                 if (req.getPackages().size() == 0 && req.getCombos().size() == 0
                         && (req.getClassId() == null || req.getClassId() == 0)) {
-                    throw new BadRequestException(400, "You don't add package or combo");
+                    throw new BadRequestException(400, "Vui lòng thêm sản phẩm");
                 }
                 Customer customer = customerRepository.findByEmail(req.getEmail()).orElse(null);
                 if (customer == null) {
@@ -264,54 +262,25 @@ public class OrderServiceImpl implements OrderService {
         order.setCode(code);
         order.setStatus(1);
 
-        if (req.getCodeCoupon() != null && req.getCodeCoupon().trim().length() > 0) {
-            Coupon coupon = null;
-            try {
-                coupon = couponRepository.findByCodeAccess(req.getCodeCoupon()).orElse(null);
-            } catch (Exception ex) {
-                ex.printStackTrace();
-            }
-            if (coupon != null) {
-                int countUseCoupon = 0;
-                if (order.getUser() != null) {
-                    countUseCoupon = orderRepository.getCountCouponUserOrder(coupon.getId(), order.getUser().getId())
-                            .size();
-                } else {
-                    countUseCoupon = orderRepository
-                            .getCountCouponCustomerOrder(coupon.getId(), order.getCustomer().getId()).size();
-                }
-                if (countUseCoupon < coupon.getQuantity()) {
-                    double discount = order.getTotalCost() * coupon.getDiscountRate() / 100;
-                    order.setTotalDiscount(discount);
-                    order.setCoupon(coupon);
-                    order.decreaseTotalCost(discount);
-                } else {
-                    throw new BadRequestException(400, "The discount code has expired");
-                }
-            } else {
-                throw new BadRequestException(400, "The discount code is incorrect or has expired");
-            }
-        }
-
         if (req.getClassId() != null && req.getClassId() != 0) {
             if (order.getUser() != null) {
                 if (orderPackageRepository.checkClassExistUser(req.getClassId(), order.getUser().getId()).size() > 0) {
-                    throw new NotFoundException(404, "Class is exist");
+                    throw new NotFoundException(404, "Bạn đã đăng ký lớp này rồi!");
                 }
                 if (traineeRepository.checkClassExistTraniee(req.getClassId(), order.getUser().getId()).size() > 0) {
-                    throw new NotFoundException(404, "Class is exist");
+                    throw new NotFoundException(404, "Bạn đã đăng ký lớp này rồi!");
                 }
             } else if (order.getCustomer() != null) {
                 if (orderPackageRepository.checkClassExistCustomer(req.getClassId(), order.getCustomer().getId())
                         .size() > 0) {
-                    throw new NotFoundException(404, "Class is exist");
+                    throw new NotFoundException(404, "Bạn đã đăng ký lớp này rồi!");
                 }
             }
 
             Class classes = classRepository.findById(req.getClassId()).orElse(null);
 
             if (classes == null) {
-                throw new NotFoundException(404, "Class  Không tồn tại");
+                throw new NotFoundException(404, "Lớp học không tồn tại");
             }
 
             if (order.getUser() != null) {
@@ -321,7 +290,7 @@ public class OrderServiceImpl implements OrderService {
                 } catch (Exception exception) {
                     exception.printStackTrace();
                 }
-                if (trainees.size() > 0) {
+                if (trainees != null && trainees.size() > 0) {
                     for (Trainee trainee : trainees) {
                         if (trainee.getAClass().getId() == classes.getId()) {
                             throw new BadRequestException(400, "Bạn đã đăng kí lớp này rồi");
@@ -339,7 +308,51 @@ public class OrderServiceImpl implements OrderService {
             order.setTotalDiscount(0);
             order.getOrderPackages().add(item);
             order.increaseTotalCost(item.getPackageCost());
+
+            if (req.getCodeCoupon() != null && req.getCodeCoupon().trim().length() > 0) {
+                Coupon coupon = null;
+                try {
+                    coupon = couponRepository.findByCodeAccess(req.getCodeCoupon()).orElse(null);
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                }
+                if (coupon != null) {
+                    int countUseCoupon = 0;
+                    if (order.getUser() != null) {
+                        countUseCoupon = orderRepository
+                                .getCountCouponUserOrder(coupon.getId(), order.getUser().getId())
+                                .size();
+                    } else {
+                        countUseCoupon = orderRepository
+                                .getCountCouponCustomerOrder(coupon.getId(), order.getCustomer().getId()).size();
+                    }
+                    if (countUseCoupon < coupon.getQuantity()) {
+                        double discount = order.getTotalCost() * coupon.getDiscountRate() / 100;
+                        order.setTotalDiscount(discount);
+                        order.setCoupon(coupon);
+                        order.decreaseTotalCost(discount);
+                    } else {
+                        throw new BadRequestException(400, "Mã giảm giá đã hết lượt sử dụng");
+                    }
+                } else {
+                    throw new BadRequestException(400, "Mã giảm giá không đúng hoặc đã hết hạn");
+                }
+            }
+            String subject = "Đăng ký lớp học LRS education thành công";
+            String des = "Mã lớp học: " + classes.getCode() + "<br> Tên khóa học"
+                    + classes.getAPackage().getTitle() +
+                    "<br> Thời gian: từ" + classes.getDateFrom() + "<br> đến" + classes.getDateTo() +
+                    "<br> Lịch học: " + classes.getTime() + "<br> vào các ngày" + classes.getSchedule() +
+                    "<br> Thông tin thanh toán: <br>     Tổng tiền: " + order.getTotalCost()
+                    + " <br>     Số tài khoản: 0586986918888<br>     Ngân hàng: quân đội MB bank<br>     tên chủ tài khoản: Nguyễn Văn Hùng";
+
+            String content = TemplateSendMail.getContentCourse("https://lms.nextin.com.vn",
+                    "Sau đây là thông tin lớp học học của bạn:",
+                    des, "Lớp học", "Đăng ký");
+            senderService.sendEmail(req.getEmail(), subject, content);
+
         } else {
+            String des = "Danh sách sản phẩm:<br>";
             for (Long id : req.getPackages()) {
                 Package _package = null;
                 try {
@@ -348,8 +361,9 @@ public class OrderServiceImpl implements OrderService {
                     ex.printStackTrace();
                 }
                 if (_package == null) {
-                    throw new NotFoundException(404, "Package  Không tồn tại");
+                    throw new NotFoundException(404, "Sản phẩm Không tồn tại");
                 }
+                des += "<br>     Khóa học: " + _package.getTitle() + ", giá: " + _package.getSalePrice() + " VNĐ";
 
                 OrderPackage item = new OrderPackage();
                 item.set_package(_package);
@@ -373,6 +387,7 @@ public class OrderServiceImpl implements OrderService {
                 for (ComboPackage element : combo.getComboPackages()) {
                     sumCost += element.getSalePrice();
                 }
+                des += "<br>     Combo: " + combo.getTitle() + ", giá: " + sumCost + " VNĐ";
                 OrderPackage item = new OrderPackage();
                 item.set_combo(combo);
                 item.setOrder(order);
@@ -381,9 +396,45 @@ public class OrderServiceImpl implements OrderService {
                 order.getOrderPackages().add(item);
                 order.increaseTotalCost(item.getPackageCost());
             }
+            if (req.getCodeCoupon() != null && req.getCodeCoupon().trim().length() > 0) {
+                Coupon coupon = null;
+                try {
+                    coupon = couponRepository.findByCodeAccess(req.getCodeCoupon()).orElse(null);
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                }
+                if (coupon != null) {
+                    int countUseCoupon = 0;
+                    if (order.getUser() != null) {
+                        countUseCoupon = orderRepository
+                                .getCountCouponUserOrder(coupon.getId(), order.getUser().getId())
+                                .size();
+                    } else {
+                        countUseCoupon = orderRepository
+                                .getCountCouponCustomerOrder(coupon.getId(), order.getCustomer().getId()).size();
+                    }
+                    if (countUseCoupon < coupon.getQuantity()) {
+                        double discount = order.getTotalCost() * coupon.getDiscountRate() / 100;
+                        order.setTotalDiscount(discount);
+                        order.setCoupon(coupon);
+                        order.decreaseTotalCost(discount);
+                    } else {
+                        throw new BadRequestException(400, "Mã giảm giá đã hết lượt sử dụng");
+                    }
+                } else {
+                    throw new BadRequestException(400, "Mã giảm giá không đúng hoặc đã hết hạn");
+                }
+            }
+            String subject = "Đăng ký khóa học LRS education thành công";
+            des += "<br> Thông tin thanh toán: <br>     Tổng tiền: " + order.getTotalCost()
+                    + " <br>     Số tài khoản: 0586986918888<br>     Ngân hàng: quân đội MB bank<br>     tên chủ tài khoản: Nguyễn Văn Hùng";
+            String content = TemplateSendMail.getContentCourse("https://lms.nextin.com.vn",
+                    "Sau đây là thông tin khóa học học học của bạn:",
+                    des, "Khóa học", "Đăng ký");
+            senderService.sendEmail(req.getEmail(), subject, content);
         }
         if (order.getOrderPackages().size() == 0) {
-            throw new NotFoundException(404, "Product  Không tồn tại");
+            throw new NotFoundException(404, "Sản phẩm Không tồn tại");
         }
         orderRepository.save(order);
     }
@@ -461,6 +512,57 @@ public class OrderServiceImpl implements OrderService {
                         throw new NotFoundException(404, "Khách hàng đã đăng ký lớp này rồi");
                     }
                 }
+                OrderPackage item = new OrderPackage();
+                item.set_package(classes.getAPackage());
+                item.setOrder(order);
+                item.setPackageCost(classes.getAPackage().getSalePrice());
+                item.setActivated(false);
+                order.setAClass(classes);
+                order.getOrderPackages().add(item);
+                order.increaseTotalCost(item.getPackageCost());
+                if (req.getCodeCoupon() != null && req.getCodeCoupon().trim().length() > 0) {
+                    Coupon coupon = null;
+                    try {
+                        coupon = couponRepository.findByCodeAccess(req.getCodeCoupon()).orElse(null);
+                    } catch (Exception ex) {
+                        ex.printStackTrace();
+                    }
+
+                    if (coupon != null) {
+                        int countUseCoupon = 0;
+                        if (order.getUser() != null) {
+                            countUseCoupon = orderRepository
+                                    .getCountCouponUserOrder(coupon.getId(), order.getUser().getId())
+                                    .size();
+                        } else {
+                            countUseCoupon = orderRepository
+                                    .getCountCouponCustomerOrder(coupon.getId(), order.getCustomer().getId()).size();
+                        }
+                        if (countUseCoupon < coupon.getQuantity()) {
+                            double discount = order.getTotalCost() * coupon.getDiscountRate() / 100;
+                            order.setTotalDiscount(discount);
+                            order.setCoupon(coupon);
+                            order.decreaseTotalCost(discount);
+                        } else {
+                            throw new BadRequestException(400,
+                                    "Mã giảm giá đã hết lượt sử dụng đối với khách hàng này");
+                        }
+                    } else {
+                        throw new BadRequestException(400, "Sai mã giảm giá");
+                    }
+                }
+                String subject = req.getStatus() == 1 ? "Đăng ký" : "Xác nhận" + " lớp học LRS education thành công";
+                String des = "Mã lớp học: " + classes.getCode() + "\n Tên khóa học"
+                        + classes.getAPackage().getTitle() +
+                        "\n Thời gian: từ" + classes.getDateFrom() + "\n đến" + classes.getDateTo() +
+                        "\n Lịch học: " + classes.getTime() + "\n vào các ngày" + classes.getSchedule() +
+                        "\n Thông tin thanh toán: \n     Tổng tiền: " + order.getTotalCost()
+                        + " \n     Số tài khoản: 0586986918888\n     Ngân hàng: quân đội MB bank\n     tên chủ tài khoản: Nguyễn Văn Hùng";
+
+                String content = TemplateSendMail.getContentCourse("https://lms.nextin.com.vn",
+                        "Sau đây là thông tin lớp học học của bạn:",
+                        des, "Lớp học", req.getStatus() == 1 ? "Đăng ký" : "Xác nhận");
+                senderService.sendEmail(req.getEmail(), subject, content);
             } else {
                 User user = userRepository.findByEmail(req.getEmail()).orElse(null);
                 if (user == null) {
@@ -470,7 +572,7 @@ public class OrderServiceImpl implements OrderService {
                     user.setFullname(req.getFullName());
                     // Nếu user bth không có set role thì set thành ROLE_USER
                     Setting userRole = settingRepository.findByValueAndType("ROLE_GUEST", 1)
-                            .orElseThrow(() -> new NotFoundException(404, "Error: Role  Không tồn tại"));
+                            .orElseThrow(() -> new NotFoundException(404, "Lỗi: Role  Không tồn tại"));
 
                     user.setRole(userRole);
 
@@ -481,9 +583,10 @@ public class OrderServiceImpl implements OrderService {
 
                     String registerLink = Utility.getSiteURL(request) + "/api/account/verify?token=" + token;
 
-                    String subject = "Mua khoá học LRS education";
+                    String subject = "Thanh toán lớp học LRS education thành công";
 
-                    String content = TemplateSendMail.getContent(registerLink, "Confirm Account",
+                    String content = TemplateSendMail.getContent(registerLink, "Thanh toán lớp học" + classes.getCode()
+                            + " LRS education thành công vui lòng xác minh tài khoản và đăng nhập để xem thông tin lớp học",
                             "Your password: " + pass);
 
                     senderService.sendEmail(user.getEmail(), subject, content);
@@ -496,30 +599,67 @@ public class OrderServiceImpl implements OrderService {
                             .size() > 0) {
                         throw new NotFoundException(404, "Khách hàng đã đăng ký lớp này rồi");
                     }
-                    String subject = "Mua khoá học LRS education";
+                    String subject = "Thanh toán lớp học LRS education thành công";
+                    String des = "Mã lớp học: " + classes.getCode() + "\n Tên khóa học"
+                            + classes.getAPackage().getTitle() +
+                            "\n Thời gian: từ" + classes.getDateFrom() + "\n đến" + classes.getDateTo() +
+                            "\n Lịch học: " + classes.getTime() + "\n vào các ngày" + classes.getSchedule();
 
-                    String content = "Bạn đã thanh toán thành công. Hãy vào tài khoản để xem lớp học";
+                    String content = TemplateSendMail.getContentCourse("https://lms.nextin.com.vn",
+                            "Sau đây là thông tin lớp học học của bạn:",
+                            des, "Lớp học", "Thanh toán");
                     user.setFullname(req.getFullName());
                     user.setPhoneNumber(req.getMobile());
                     userRepository.save(user);
-                    order.setUser(user);
                     senderService.sendEmail(user.getEmail(), subject, content);
                 }
                 order.setUser(user);
+                OrderPackage item = new OrderPackage();
+                item.set_package(classes.getAPackage());
+                item.setOrder(order);
+                item.setPackageCost(classes.getAPackage().getSalePrice());
+                item.setActivated(false);
+                order.setAClass(classes);
+                order.getOrderPackages().add(item);
+                order.increaseTotalCost(item.getPackageCost());
+                if (req.getCodeCoupon() != null && req.getCodeCoupon().trim().length() > 0) {
+                    Coupon coupon = null;
+                    try {
+                        coupon = couponRepository.findByCodeAccess(req.getCodeCoupon()).orElse(null);
+                    } catch (Exception ex) {
+                        ex.printStackTrace();
+                    }
+
+                    if (coupon != null) {
+                        int countUseCoupon = 0;
+                        if (order.getUser() != null) {
+                            countUseCoupon = orderRepository
+                                    .getCountCouponUserOrder(coupon.getId(), order.getUser().getId())
+                                    .size();
+                        } else {
+                            countUseCoupon = orderRepository
+                                    .getCountCouponCustomerOrder(coupon.getId(), order.getCustomer().getId()).size();
+                        }
+                        if (countUseCoupon < coupon.getQuantity()) {
+                            double discount = order.getTotalCost() * coupon.getDiscountRate() / 100;
+                            order.setTotalDiscount(discount);
+                            order.setCoupon(coupon);
+                            order.decreaseTotalCost(discount);
+                        } else {
+                            throw new BadRequestException(400,
+                                    "Mã giảm giá đã hết lượt sử dụng đối với khách hàng này");
+                        }
+                    } else {
+                        throw new BadRequestException(400, "Sai mã giảm giá");
+                    }
+                }
                 Trainee trainee = new Trainee();
                 trainee.setUser(user);
-                trainee.setStatus(true);
+                trainee.setStatus(false);
                 trainee.setAClass(classes);
+                trainee.setDropOutDate(classes.getDateTo());
                 traineeRepository.save(trainee);
             }
-            OrderPackage item = new OrderPackage();
-            item.set_package(classes.getAPackage());
-            item.setOrder(order);
-            item.setPackageCost(classes.getAPackage().getSalePrice());
-            item.setActivated(false);
-            order.setAClass(classes);
-            order.getOrderPackages().add(item);
-            order.increaseTotalCost(item.getPackageCost());
         } else {
             User user = userRepository.findByEmail(req.getEmail()).orElse(null);
             if (user != null) {
@@ -531,7 +671,7 @@ public class OrderServiceImpl implements OrderService {
             } else {
                 if (req.getPackages().size() == 0 && req.getCombos().size() == 0
                         && (req.getClassId() == null || req.getClassId() == 0)) {
-                    throw new BadRequestException(400, "Vui long chọn sản phẩm");
+                    throw new BadRequestException(400, "Vui lòng chọn sản phẩm");
                 }
                 Customer customer = customerRepository.findByEmail(req.getEmail()).orElse(null);
                 if (customer == null) {
@@ -540,6 +680,8 @@ public class OrderServiceImpl implements OrderService {
                 }
                 order.setCustomer(customer);
             }
+            String des = "Danh sách sản phẩm:\n";
+
             for (Long id : req.getPackages()) {
                 Package _package = null;
                 try {
@@ -548,15 +690,21 @@ public class OrderServiceImpl implements OrderService {
                     ex.printStackTrace();
                 }
                 if (_package == null) {
-                    throw new NotFoundException(404, "Package  Không tồn tại");
+                    throw new NotFoundException(404, "Sản phẩm Không tồn tại");
                 }
-
                 OrderPackage item = new OrderPackage();
                 item.set_package(_package);
                 item.setOrder(order);
                 item.setPackageCost(_package.getSalePrice());
-                if (req.getStatus() != 3)
+                if (req.getStatus() == 3) {
                     item.setActivationKey(RandomCode.getAlphaNumericString(8).toUpperCase());
+                }
+
+                if (req.getStatus() != 3) {
+                    des += "\n     Khóa học: " + _package.getTitle() + ", giá: " + _package.getSalePrice() + " VNĐ";
+                } else {
+                    des += "\n     Khóa học: " + _package.getTitle() + ", mã kích hoạt: " + item.getActivationKey();
+                }
                 item.setActivated(false);
                 order.getOrderPackages().add(item);
                 order.increaseTotalCost(item.getPackageCost());
@@ -570,7 +718,7 @@ public class OrderServiceImpl implements OrderService {
                     ex.printStackTrace();
                 }
                 if (combo == null)
-                    throw new NotFoundException(404, "Combo  Không tồn tại");
+                    throw new NotFoundException(404, "Combo Không tồn tại");
                 int sumCost = 0;
                 for (ComboPackage element : combo.getComboPackages()) {
                     sumCost += element.getSalePrice();
@@ -579,43 +727,65 @@ public class OrderServiceImpl implements OrderService {
                 item.set_combo(combo);
                 item.setOrder(order);
                 item.setPackageCost(sumCost);
-                if (req.getStatus() != 3)
+                if (req.getStatus() == 3) {
                     item.setActivationKey(RandomCode.getAlphaNumericString(8).toUpperCase());
+                }
+                if (req.getStatus() != 3) {
+                    des += "\n     Combo: " + combo.getTitle() + ", giá: " + sumCost + " VNĐ";
+                } else {
+                    des += "\n     Combo: " + combo.getTitle() + ", mã kích hoạt: " + item.getActivationKey();
+                }
                 item.setActivated(false);
                 order.getOrderPackages().add(item);
                 order.increaseTotalCost(item.getPackageCost());
             }
-        }
-        if (req.getCodeCoupon() != null && req.getCodeCoupon().trim().length() > 0) {
-            Coupon coupon = null;
-            try {
-                coupon = couponRepository.findByCodeAccess(req.getCodeCoupon()).orElse(null);
-            } catch (Exception ex) {
-                ex.printStackTrace();
-            }
+            if (req.getCodeCoupon() != null && req.getCodeCoupon().trim().length() > 0) {
+                Coupon coupon = null;
+                try {
+                    coupon = couponRepository.findByCodeAccess(req.getCodeCoupon()).orElse(null);
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                }
 
-            if (coupon != null) {
-                int countUseCoupon = 0;
-                if (order.getUser() != null) {
-                    countUseCoupon = orderRepository
-                            .getCountCouponUserOrder(coupon.getId(), order.getUser().getId())
-                            .size();
+                if (coupon != null) {
+                    int countUseCoupon = 0;
+                    if (order.getUser() != null) {
+                        countUseCoupon = orderRepository
+                                .getCountCouponUserOrder(coupon.getId(), order.getUser().getId())
+                                .size();
+                    } else {
+                        countUseCoupon = orderRepository
+                                .getCountCouponCustomerOrder(coupon.getId(), order.getCustomer().getId()).size();
+                    }
+                    if (countUseCoupon < coupon.getQuantity()) {
+                        double discount = order.getTotalCost() * coupon.getDiscountRate() / 100;
+                        order.setTotalDiscount(discount);
+                        order.setCoupon(coupon);
+                        order.decreaseTotalCost(discount);
+                    } else {
+                        throw new BadRequestException(400, "Mã giảm giá đã hết lượt sử dụng đối với khách hàng này");
+                    }
                 } else {
-                    countUseCoupon = orderRepository
-                            .getCountCouponCustomerOrder(coupon.getId(), order.getCustomer().getId()).size();
+                    throw new BadRequestException(400, "Sai mã giảm giá");
                 }
-                if (countUseCoupon < coupon.getQuantity()) {
-                    double discount = order.getTotalCost() * coupon.getDiscountRate() / 100;
-                    order.setTotalDiscount(discount);
-                    order.setCoupon(coupon);
-                    order.decreaseTotalCost(discount);
-                } else {
-                    throw new BadRequestException(400, "Mã giảm giá đã hết lượt sử dụng đối với khách hàng này");
-                }
+            }
+            if (req.getStatus() != 3) {
+                String subject = req.getStatus() == 1 ? "Đăng ký" : "Xác nhận" + " khóa học LRS education thành công";
+                des += "\n Thông tin thanh toán: \n     Tổng tiền: " + order.getTotalCost()
+                        + " \n     Số tài khoản: 0586986918888\n     Ngân hàng: quân đội MB bank\n     tên chủ tài khoản: Nguyễn Văn Hùng";
+                String content = TemplateSendMail.getContentCourse("https://lms.nextin.com.vn",
+                        "Sau đây là thông tin khóa học học học của bạn:",
+                        des, "Khóa học", req.getStatus() == 1 ? "Đăng ký" : "Xác nhận");
+                senderService.sendEmail(req.getEmail(), subject, content);
             } else {
-                throw new BadRequestException(400, "Sai mã giảm giá");
+                String subject = "Thanh toán khóa học LRS education thành công";
+                String content = TemplateSendMail.getContentCourse("https://lms.nextin.com.vn",
+                        "Sau đây là thông tin khóa học học học của bạn:",
+                        des, "Khóa học", "Thanh toán");
+                senderService.sendEmail(req.getEmail(), subject, content);
             }
         }
+
         if (order.getOrderPackages().size() == 0) {
             throw new NotFoundException(404, "Sản phẩm không tồn tại");
         }
@@ -639,107 +809,12 @@ public class OrderServiceImpl implements OrderService {
 
         if (req.getStatus() >= 1 && req.getStatus() <= 4) {
             order.setStatus(req.getStatus());
-        } else {
-            throw new NotFoundException(404, "Trạng thái không chính xác!");
         }
 
         if (req.getClassId() != null && req.getClassId() != 0) {
             Class classes = classRepository.findById(req.getClassId()).orElse(null);
             if (classes == null) {
                 throw new NotFoundException(404, "Lớp học không tồn tại");
-            }
-            if (req.getStatus() != 3) {
-                if (order.getUser() != null) {
-                    if (req.getMobile() != null && req.getMobile().trim().length() != 0) {
-                        order.getUser().setPhoneNumber(req.getMobile());
-                    }
-                    if (req.getFullName() != null && req.getFullName().trim().length() != 0) {
-                        order.getUser().setFullname(req.getFullName());
-                    }
-                    userRepository.save(order.getUser());
-                } else {
-                    System.out.println(req.getMobile().trim().length() != 0);
-                    if (req.getMobile() != null && req.getMobile().trim().length() != 0) {
-                        order.getCustomer().setMobile(req.getMobile());
-                    }
-                    if (req.getFullName() != null && req.getFullName().trim().length() != 0) {
-                        order.getCustomer().setFullName(req.getFullName());
-                    }
-                    customerRepository.save(order.getCustomer());
-                }
-                if (order.getAClass().getId() != req.getClassId()) {
-                    if (order.getUser() != null) {
-                        if (orderPackageRepository.checkClassExistUser(req.getClassId(), order.getUser().getId())
-                                .size() > 0) {
-                            throw new NotFoundException(404, "Khách hàng đã đăng ký lớp này rồi");
-                        }
-                        if (traineeRepository.checkClassExistTraniee(req.getClassId(), order.getUser().getId())
-                                .size() > 0) {
-                            throw new NotFoundException(404, "Khách hàng đã đăng ký lớp này rồi");
-                        }
-                    } else if (order.getCustomer() != null) {
-                        if (orderPackageRepository
-                                .checkClassExistCustomer(req.getClassId(), order.getCustomer().getId())
-                                .size() > 0) {
-                            throw new NotFoundException(404, "Khách hàng đã đăng ký lớp này rồi");
-                        }
-                    }
-                }
-            } else {
-                if (order.getUser() == null) {
-                    String pass = RandomCode.getAlphaNumericString(8).toUpperCase();
-                    User user = new User(order.getUser().getEmail(), "",
-                            encoder.encode(encoder.encode(pass)), req.getMobile(), false);
-                    user.setFullname(req.getFullName());
-                    // Nếu user bth không có set role thì set thành ROLE_USER
-                    Setting userRole = settingRepository.findByValueAndType("ROLE_GUEST", 1)
-                            .orElseThrow(() -> new NotFoundException(404, "Error: Role  Không tồn tại"));
-
-                    user.setRole(userRole);
-
-                    String token = RandomString.make(30);
-                    user.setRegisterToken(token);
-                    user.setTimeRegisterToken(LocalDateTime.now());
-                    userRepository.save(user);
-
-                    String registerLink = Utility.getSiteURL(request) + "/api/account/verify?token=" + token;
-
-                    String subject = "Mua khoá học LRS education";
-
-                    String content = TemplateSendMail.getContent(registerLink, "Confirm Account",
-                            "Your password: " + pass);
-
-                    senderService.sendEmail(user.getEmail(), subject, content);
-                    order.setUser(user);
-                } else {
-                    if (order.getAClass().getId() != req.getClassId()) {
-                        if (orderPackageRepository.checkClassExistUser(req.getClassId(), order.getUser().getId())
-                                .size() > 0) {
-                            throw new NotFoundException(404, "Khách hàng đã đăng ký lớp này rồi");
-                        }
-                        if (traineeRepository.checkClassExistTraniee(req.getClassId(), order.getUser().getId())
-                                .size() > 0) {
-                            throw new NotFoundException(404, "Khách hàng đã đăng ký lớp này rồi");
-                        }
-                    }
-                    String subject = "Mua khoá học LRS education";
-
-                    String content = "Bạn đã thanh toán thành công. Hãy vào tài khoản để xem lớp học";
-                    if (req.getMobile() != null && req.getMobile().trim().length() != 0) {
-                        order.getUser().setPhoneNumber(req.getMobile());
-                    }
-                    if (req.getFullName() != null && req.getFullName().trim().length() != 0) {
-                        order.getUser().setFullname(req.getFullName());
-                    }
-                    userRepository.save(order.getUser());
-                    order.setUser(order.getUser());
-                    senderService.sendEmail(order.getUser().getEmail(), subject, content);
-                }
-                Trainee trainee = new Trainee();
-                trainee.setUser(order.getUser());
-                trainee.setStatus(true);
-                trainee.setAClass(classes);
-                traineeRepository.save(trainee);
             }
             OrderPackage item = new OrderPackage();
             item.set_package(classes.getAPackage());
@@ -798,6 +873,120 @@ public class OrderServiceImpl implements OrderService {
                     throw new BadRequestException(400, "Mã giảm giá đã hết lượt sử dụng đối với khách hàng này");
                 }
             }
+            if (req.getStatus() != 3) {
+                if (order.getUser() != null) {
+                    if (req.getMobile() != null && req.getMobile().trim().length() != 0) {
+                        order.getUser().setPhoneNumber(req.getMobile());
+                    }
+                    if (req.getFullName() != null && req.getFullName().trim().length() != 0) {
+                        order.getUser().setFullname(req.getFullName());
+                    }
+                    userRepository.save(order.getUser());
+                } else {
+                    if (req.getMobile() != null && req.getMobile().trim().length() != 0) {
+                        order.getCustomer().setMobile(req.getMobile());
+                    }
+                    if (req.getFullName() != null && req.getFullName().trim().length() != 0) {
+                        order.getCustomer().setFullName(req.getFullName());
+                    }
+                    customerRepository.save(order.getCustomer());
+                }
+                if (order.getAClass().getId() != req.getClassId()) {
+                    if (order.getUser() != null) {
+                        if (orderPackageRepository.checkClassExistUser(req.getClassId(), order.getUser().getId())
+                                .size() > 0) {
+                            throw new NotFoundException(404, "Khách hàng đã đăng ký lớp này rồi");
+                        }
+                        if (traineeRepository.checkClassExistTraniee(req.getClassId(), order.getUser().getId())
+                                .size() > 0) {
+                            throw new NotFoundException(404, "Khách hàng đã đăng ký lớp này rồi");
+                        }
+                    } else if (order.getCustomer() != null) {
+                        if (orderPackageRepository
+                                .checkClassExistCustomer(req.getClassId(), order.getCustomer().getId())
+                                .size() > 0) {
+                            throw new NotFoundException(404, "Khách hàng đã đăng ký lớp này rồi");
+                        }
+                    }
+                    String subject = req.getStatus() == 1 ? "Đăng ký"
+                            : "Xác nhận" + " lớp học LRS education thành công";
+                    String des = "Mã lớp học: " + classes.getCode() + "\n Tên khóa học"
+                            + classes.getAPackage().getTitle() +
+                            "\n Thời gian: từ" + classes.getDateFrom() + "\n đến" + classes.getDateTo() +
+                            "\n Lịch học: " + classes.getTime() + "\n vào các ngày" + classes.getSchedule() +
+                            "\n Thông tin thanh toán: \n     Tổng tiền: " + order.getTotalCost()
+                            + " \n     Số tài khoản: 0586986918888\n     Ngân hàng: quân đội MB bank\n     tên chủ tài khoản: Nguyễn Văn Hùng";
+
+                    String content = TemplateSendMail.getContentCourse("https://lms.nextin.com.vn",
+                            "Sau đây là thông tin lớp học học của bạn:",
+                            des, "Lớp học", req.getStatus() == 1 ? "Đăng ký" : "Xác nhận");
+                    senderService.sendEmail(req.getEmail(), subject, content);
+                }
+            } else {
+                if (order.getUser() == null) {
+                    String pass = RandomCode.getAlphaNumericString(8).toUpperCase();
+                    User user = new User(order.getUser().getEmail(), "",
+                            encoder.encode(encoder.encode(pass)), req.getMobile(), false);
+                    user.setFullname(req.getFullName());
+                    // Nếu user bth không có set role thì set thành ROLE_USER
+                    Setting userRole = settingRepository.findByValueAndType("ROLE_GUEST", 1)
+                            .orElseThrow(() -> new NotFoundException(404, "Error: Role  Không tồn tại"));
+
+                    user.setRole(userRole);
+
+                    String token = RandomString.make(30);
+                    user.setRegisterToken(token);
+                    user.setTimeRegisterToken(LocalDateTime.now());
+                    userRepository.save(user);
+
+                    String registerLink = Utility.getSiteURL(request) + "/api/account/verify?token=" + token;
+
+                    String subject = "Thanh toán lớp học LRS education thành công";
+
+                    String content = TemplateSendMail.getContent(registerLink, "Thanh toán lớp học" + classes.getCode()
+                            + " LRS education thành công vui lòng xác minh tài khoản và đăng nhập để xem thông tin lớp học",
+                            "Your password: " + pass);
+
+                    senderService.sendEmail(user.getEmail(), subject, content);
+                    order.setUser(user);
+                } else {
+                    if (order.getAClass().getId() != req.getClassId()) {
+                        if (orderPackageRepository.checkClassExistUser(req.getClassId(), order.getUser().getId())
+                                .size() > 0) {
+                            throw new NotFoundException(404, "Khách hàng đã đăng ký lớp này rồi");
+                        }
+                        if (traineeRepository.checkClassExistTraniee(req.getClassId(), order.getUser().getId())
+                                .size() > 0) {
+                            throw new NotFoundException(404, "Khách hàng đã đăng ký lớp này rồi");
+                        }
+                    }
+                    if (req.getMobile() != null && req.getMobile().trim().length() != 0) {
+                        order.getUser().setPhoneNumber(req.getMobile());
+                    }
+                    if (req.getFullName() != null && req.getFullName().trim().length() != 0) {
+                        order.getUser().setFullname(req.getFullName());
+                    }
+                    userRepository.save(order.getUser());
+                    order.setUser(order.getUser());
+                    String subject = "Thanh toán lớp học LRS education thành công";
+                    String des = "Mã lớp học: " + classes.getCode() + "\n Tên khóa học"
+                            + classes.getAPackage().getTitle() +
+                            "\n Thời gian: từ" + classes.getDateFrom() + "\n đến" + classes.getDateTo() +
+                            "\n Lịch học: " + classes.getTime() + "\n vào các ngày" + classes.getSchedule();
+
+                    String content = TemplateSendMail.getContentCourse("https://lms.nextin.com.vn",
+                            "Sau đây là thông tin lớp học học của bạn:",
+                            des, "Lớp học", "Thanh toán");
+                    senderService.sendEmail(order.getUser().getEmail(), subject, content);
+                }
+                Trainee trainee = new Trainee();
+                trainee.setUser(order.getUser());
+                trainee.setStatus(false);
+                trainee.setAClass(classes);
+                trainee.setDropOutDate(classes.getDateTo());
+                traineeRepository.save(trainee);
+            }
+
         } else {
             if (order.getUser() != null) {
                 if (req.getMobile() != null && req.getMobile().trim().length() != 0) {
@@ -815,6 +1004,34 @@ public class OrderServiceImpl implements OrderService {
                     order.getCustomer().setFullName(req.getFullName());
                 }
                 customerRepository.save(order.getCustomer());
+            }
+            if (req.getStatus() == 3) {
+                String des = "Danh sách sản phẩm:\n";
+                for (OrderPackage op : order.getOrderPackages()) {
+                    if (op.getActivationKey() != null || op.isActivated())
+                        continue;
+
+                    String code = null;
+                    if (order.getAClass() == null) {
+                        code = RandomCode.getAlphaNumericString(8).toUpperCase();
+                        op.setActivationKey(code);
+                    }
+                    if (op.get_package() != null) {
+                        des += "\n     Khóa học: " + op.get_package().getTitle() + ", mã kích hoạt: " + code;
+                    } else {
+                        des += "\n     Khóa học: " + op.get_combo().getTitle() + ", mã kích hoạt: " + code;
+                    }
+                    try {
+                        orderPackageRepository.save(op);
+                    } catch (Exception exception) {
+                        exception.printStackTrace();
+                    }
+                }
+                String subject = "Thanh toán khóa học LRS education thành công";
+                String content = TemplateSendMail.getContentCourse("https://lms.nextin.com.vn",
+                        "Sau đây là thông tin khóa học học học của bạn:",
+                        des, "Khóa học", "Thanh toán");
+                senderService.sendEmail(req.getEmail(), subject, content);
             }
         }
         if (order.getOrderPackages().size() == 0) {
@@ -879,11 +1096,11 @@ public class OrderServiceImpl implements OrderService {
             ex.printStackTrace();
         }
         if (order == null) {
-            throw new NotFoundException(404, "Order  Không tồn tại");
+            throw new NotFoundException(404, "Đơn hàng Không tồn tại");
         }
 
         if (status == null)
-            throw new BadRequestException(400, "Please input status");
+            throw new BadRequestException(400, "Vui lòng nhập trạng thái");
         if (status == 3) {
             for (OrderPackage op : order.getOrderPackages()) {
                 if (op.getActivationKey() != null || op.isActivated())
@@ -901,8 +1118,8 @@ public class OrderServiceImpl implements OrderService {
                 }
                 if (order.getCustomer() != null) {
                     if (order.getAClass() != null) {
-                        User user;
-                        if (!userRepository.existsByEmail(order.getCustomer().getEmail())) {
+                        User user = userRepository.findByEmail(order.getCustomer().getEmail()).orElse(null);
+                        if (user == null) {
                             String pass = RandomCode.getAlphaNumericString(8).toUpperCase();
                             user = new User(order.getCustomer().getEmail(), "",
                                     encoder.encode(encoder.encode(pass)), order.getCustomer().getMobile(), false);
@@ -921,59 +1138,98 @@ public class OrderServiceImpl implements OrderService {
 
                             String registerLink = Utility.getSiteURL(request) + "/api/account/verify?token=" + token;
 
-                            String subject = "Mua khoá học LRS education";
+                            String subject = "Thanh toán lớp học LRS education thành công";
 
-                            String content = TemplateSendMail.getContent(registerLink, "Confirm Account",
+                            String content = TemplateSendMail.getContent(registerLink, "Thanh toán lớp học"
+                                    + order.getAClass().getCode()
+                                    + " LRS education thành công vui lòng xác minh tài khoản và đăng nhập để xem thông tin lớp học",
                                     "Your password: " + pass);
 
-                            senderService.sendEmail(order.getCustomer().getEmail(), subject, content);
+                            senderService.sendEmail(user.getEmail(), subject, content);
                         } else {
-                            user = userRepository.findByEmail(order.getCustomer().getEmail()).orElse(null);
-                            String subject = "Mua khoá học LRS education";
+                            String subject = "Thanh toán lớp học LRS education thành công";
+                            String des = "Mã lớp học: " + order.getAClass().getCode() + "\n Tên khóa học"
+                                    + order.getAClass().getAPackage().getTitle() +
+                                    "\n Thời gian: từ" + order.getAClass().getDateFrom() + "\n đến"
+                                    + order.getAClass().getDateTo() +
+                                    "\n Lịch học: " + order.getAClass().getTime() + "\n vào các ngày"
+                                    + order.getAClass().getSchedule();
 
-                            String content = "Bạn đã thanh toán thành công. Hãy vào tài khoản để xem lớp học";
-
-                            senderService.sendEmail(order.getCustomer().getEmail(), subject, content);
+                            String content = TemplateSendMail.getContentCourse("https://lms.nextin.com.vn",
+                                    "Sau đây là thông tin lớp học học của bạn:",
+                                    des, "Lớp học", "Thanh toán");
+                            senderService.sendEmail(user.getEmail(), subject, content);
                         }
 
                         Trainee trainee = new Trainee();
                         trainee.setUser(user);
-                        trainee.setStatus(true);
+                        trainee.setStatus(false);
                         trainee.setAClass(order.getAClass());
+                        trainee.setDropOutDate(order.getAClass().getDateTo());
                         traineeRepository.save(trainee);
                     } else {
-                        senderService.sendEmail(order.getCustomer().getEmail(), "Code verify course",
-                                "Course code " + op.get_package() != null ? op.get_package().getTitle() : op.get_combo().getTitle() + " is:" + code);
+                        String subject = "Thanh toán khóa học LRS education thành công";
+                        String des = "   Khóa học: " + (op.get_package() != null ? op.get_package().getTitle() : op.get_combo().getTitle()) + ", mã kích hoạt: " + code;
+
+                        String content = TemplateSendMail.getContentCourse("https://lms.nextin.com.vn",
+                                "Sau đây là thông tin khóa học học học của bạn:",
+                                des, "Khóa học", "Thanh toán");
+                        senderService.sendEmail(order.getUser().getEmail(), subject, content);
                     }
                 } else {
                     if (order.getAClass() != null) {
-
                         Trainee trainee = new Trainee();
                         trainee.setUser(order.getUser());
-                        trainee.setStatus(true);
+                        trainee.setStatus(false);
                         trainee.setAClass(order.getAClass());
+                        trainee.setDropOutDate(order.getAClass().getDateTo());
                         traineeRepository.save(trainee);
 
-                        String subject = "Mua khoá học LRS education";
+                        String subject = "Thanh toán lớp học LRS education thành công";
+                        String des = "Mã lớp học: " + order.getAClass().getCode() + "\n Tên khóa học"
+                                + order.getAClass().getAPackage().getTitle() +
+                                "\n Thời gian: từ" + order.getAClass().getDateFrom() + "\n đến"
+                                + order.getAClass().getDateTo() +
+                                "\n Lịch học: " + order.getAClass().getTime() + "\n vào các ngày"
+                                + order.getAClass().getSchedule();
 
-                        String content = "Bạn đã thanh toán thành công. Hãy vào tài khoản để xem lớp học";
-
+                        String content = TemplateSendMail.getContentCourse("https://lms.nextin.com.vn",
+                                "Sau đây là thông tin lớp học học của bạn:",
+                                des, "Lớp học", "Thanh toán");
                         senderService.sendEmail(order.getUser().getEmail(), subject, content);
                     } else {
-                        senderService.sendEmail(order.getUser().getEmail(), "Code verify course",
-                                "Course code " + op.get_package() != null ? op.get_package().getTitle() : op.get_combo().getTitle() + " is:" + code);
+                        String subject = "Thanh toán khóa học LRS education thành công";
+                        String des = "   Khóa học: " + (op.get_package() != null ? op.get_package().getTitle() : op.get_combo().getTitle() )+ ", mã kích hoạt: " + code;
+
+                        String content = TemplateSendMail.getContentCourse("https://lms.nextin.com.vn",
+                                "Sau đây là thông tin khóa học học học của bạn:",
+                                des, "Khóa học", "Thanh toán");
+                        senderService.sendEmail(order.getUser().getEmail(), subject, content);
                     }
+                }
+            }
+        }
+        if (status == 4) {
+            for (OrderPackage op : order.getOrderPackages()) {
+                if (op.isActivated()) {
+                    throw new BadRequestException(400,
+                            "Khóa học có trong đơn đã kích hoạt, không thể thai đổi trạng thái này nữa");
+                }
+                op.setActivationKey(null);
+                try {
+                    orderPackageRepository.save(op);
+                } catch (Exception exception) {
+                    exception.printStackTrace();
                 }
             }
         }
         order.setStatus(status);
         order.setUpdatedDate(LocalDateTime.now().toString());
         orderRepository.save(order);
-
     }
 
     @Override
-    public void pay(String code) {
+    public void pay(String code, HttpServletRequest request) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         String username = auth.getName();
         User user = userRepository.findByUsername(username);
@@ -985,7 +1241,7 @@ public class OrderServiceImpl implements OrderService {
             ex.printStackTrace();
         }
         if (order == null)
-            throw new NotFoundException(404, "Cart is emty");
+            throw new NotFoundException(404, "Giỏ hàng trống");
 
         if (code != null && code.trim().length() > 0) {
             Coupon coupon = null;
@@ -1009,12 +1265,27 @@ public class OrderServiceImpl implements OrderService {
                     order.setCoupon(coupon);
                     order.setTotalCost(order.getTotalCost() - discount);
                 } else {
-                    throw new BadRequestException(400, "The discount code has expired");
+                    throw new BadRequestException(400, "Bạn đã hết lượt sử dụng mã này");
                 }
             } else {
-                throw new BadRequestException(400, "The discount code is incorrect or has expired");
+                throw new BadRequestException(400, "Mã giảm giá của bạn không đúng hoặc đã hết hạn");
             }
         }
+        String des = "Danh sách sản phẩm:\n";
+        for (OrderPackage op : order.getOrderPackages()) {
+            if (op.get_package() != null) {
+                des += "\n     Khóa học: " + op.get_package().getTitle() + ", giá: " + op.getPackageCost() + " VNĐ";
+            } else {
+                des += "\n     Combo: " + op.get_package().getTitle() + ", giá: " + op.getPackageCost() + " VNĐ";
+            }
+        }
+        String subject = "Đăng ký  khóa học LRS education thành công";
+        des += "\n Thông tin thanh toán: \n     Tổng tiền: " + order.getTotalCost()
+                + " \n     Số tài khoản: 0586986918888\n     Ngân hàng: quân đội MB bank\n     tên chủ tài khoản: Nguyễn Văn Hùng";
+        String content = TemplateSendMail.getContentCourse("https://lms.nextin.com.vn",
+                "Sau đây là thông tin khóa học học học của bạn:",
+                des, "Khóa học", "Đăng ký");
+        senderService.sendEmail(user.getEmail(), subject, content);
         order.setStatus(1);
         order.setCreatedDate(LocalDateTime.now().toString());
         order.setUpdatedDate(LocalDateTime.now().toString());

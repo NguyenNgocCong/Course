@@ -62,4 +62,10 @@ public interface PostRepository extends JpaRepository<Post, Long> {
 
 	@Query(value = "SELECT * FROM post order by created_date desc LIMIT 0, ?1", nativeQuery = true)
 	List<Post> findTopRecent(int top);
+
+	@Query(value = "SELECT count(*) FROM post WHERE created_date >= DATE(DATE_SUB(NOW(), INTERVAL (WEEKDAY(NOW()) + 7) DAY)) and created_date < DATE(DATE_SUB(NOW(), INTERVAL WEEKDAY(NOW()) DAY))", nativeQuery = true)
+    long countOldPost();
+
+    @Query(value = "SELECT count(*) FROM post WHERE created_date >= DATE(DATE_SUB(NOW(), INTERVAL WEEKDAY(NOW()) DAY))", nativeQuery = true)
+    long countNewPost();
 }

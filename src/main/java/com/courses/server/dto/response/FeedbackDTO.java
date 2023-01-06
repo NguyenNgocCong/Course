@@ -6,6 +6,7 @@ import lombok.Data;
 
 @Data
 public class FeedbackDTO {
+    private Long id;
     private String body;
     private int vote;
     private ExpertDTO expert;
@@ -15,6 +16,7 @@ public class FeedbackDTO {
     private String created_date;
 
     public FeedbackDTO(Feedback feedback) {
+        id = feedback.getId();
         body = feedback.getBody();
         vote = feedback.getVote();
         if(feedback.getExpert()!=null) expert = new ExpertDTO(feedback.getExpert());

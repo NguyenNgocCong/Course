@@ -132,7 +132,7 @@ public class PostController {
 		PostReq req = mapper.readValue(data, PostReq.class);
 
 		postService.create(req, image);
-		return ResponseEntity.ok(new MessageResponse("Create post success"));
+		return ResponseEntity.ok(new MessageResponse("Tạo bài viết thành công"));
 	}
 
 	@PutMapping(value = "/update", headers = { "content-type=multipart/mixed", "content-type=multipart/form-data" })
@@ -143,7 +143,7 @@ public class PostController {
 		ObjectMapper mapper = new ObjectMapper();
 		PostReq req = mapper.readValue(data, PostReq.class);
 		postService.update(id, req, image);
-		return ResponseEntity.ok(new MessageResponse("Update post success"));
+		return ResponseEntity.ok(new MessageResponse("Cập nhật bài viết thành công"));
 	}
 
 	@DeleteMapping("/{id}")
@@ -151,7 +151,7 @@ public class PostController {
 	public ResponseEntity<?> deletePost(@PathVariable("id") Long id) {
 		Authen.check();
 		postService.delete(id);
-		return ResponseEntity.ok(new MessageResponse("Delete post is success"));
+		return ResponseEntity.ok(new MessageResponse("Xóa bài viết thành công"));
 	}
 
 	@PostMapping("/upload-image-post")
@@ -159,6 +159,6 @@ public class PostController {
 			throws IOException {
 		Authen.check();
 		postService.uploadImagePost(id, avatar);
-		return ResponseEntity.ok(new MessageResponse("Upload image post success"));
+		return ResponseEntity.ok(new MessageResponse("Cập nhật ảnh bài viết thành công"));
 	}
 }

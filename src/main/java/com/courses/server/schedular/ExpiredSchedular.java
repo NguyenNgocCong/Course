@@ -5,6 +5,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import com.courses.server.repositories.ClassRepository;
+import com.courses.server.repositories.TraineeRepository;
 import com.courses.server.repositories.UserPackageRepository;
 
 @Component
@@ -16,14 +17,18 @@ public class ExpiredSchedular {
   @Autowired
 	private UserPackageRepository userPackageRepository;
 
+  @Autowired
+	private TraineeRepository traineeRepository;
+
   @Scheduled(cron = "0 15 18 * * ?", zone = "Europe/Paris")
   public void checkClassSchedular() {
-    classRepository.checkEndPage();
     classRepository.checkStartPage();
   }
 
   @Scheduled(cron = "0 15 18 * * ?", zone = "Europe/Paris")
   public void checkTraineeSchedular() {
     userPackageRepository.checkEndPage();
+    traineeRepository.checkEndPage();
+    traineeRepository.checkEndPage();
   } 
 }

@@ -69,7 +69,7 @@ public class AdminWebContactController {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         String username = auth.getName();
         webContactService.updateWebContact(username, id, webContactRequest);
-        return ResponseEntity.ok(new MessageResponse("Update web contact success"));
+        return ResponseEntity.ok(new MessageResponse("Cập nhật chăm sóc khách hàng thông công"));
     }
 
     @PutMapping("/update-status")
@@ -79,7 +79,7 @@ public class AdminWebContactController {
         String username = auth.getName();
         Boolean status = statusReq.get("status");
         webContactService.updateStatusWebContact(username, id, status);
-        return ResponseEntity.ok(new MessageResponse("Update status web contact success"));
+        return ResponseEntity.ok(new MessageResponse("Cập nhật trạng thái thông công"));
     }
 
     @DeleteMapping("/delete")
@@ -87,7 +87,7 @@ public class AdminWebContactController {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         String username = auth.getName();
         webContactService.deleteWebContact(username, id);
-        return ResponseEntity.ok(new MessageResponse("Delete web contact success"));
+        return ResponseEntity.ok(new MessageResponse("Xóa chăm sóc khách hàng thông công"));
     }
 
 }

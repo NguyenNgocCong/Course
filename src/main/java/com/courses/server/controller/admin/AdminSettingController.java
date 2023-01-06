@@ -39,13 +39,13 @@ public class AdminSettingController {
 	@PostMapping("/addSetting")
 	public ResponseEntity<?> addSetting(@RequestBody SettingRequest settingRequest) {
 		settingService.addSetting(settingRequest);
-		return ResponseEntity.ok(new MessageResponse("Send setting success"));
+		return ResponseEntity.ok(new MessageResponse("Thêm cấu hình thành công"));
 	}
 
 	@PutMapping("/updateSetting")
 	public ResponseEntity<?> updateSetting(@RequestBody SettingRequest settingRequest) {
 		settingService.updateSettings(settingRequest);
-		return ResponseEntity.ok(new MessageResponse("Update setting success"));
+		return ResponseEntity.ok(new MessageResponse("Cập nhật cấu hình thành công"));
 	}
 
 	@GetMapping("/getListSetting")
@@ -107,9 +107,4 @@ public class AdminSettingController {
 		return ResponseEntity.ok(settingService.getSettingByType(Long.valueOf(7)));
 	}
 
-	@DeleteMapping("/deleteSetting/{id}")
-	public ResponseEntity<?> deleteSetting(@PathVariable Long id) {
-		settingService.deleteSetting(id);
-		return ResponseEntity.ok(new MessageResponse("Send setting success"));
-	}
 }

@@ -79,7 +79,7 @@ public class UserServiceImpl implements UserService {
 		}
 
 		User user = userRepository.findByEmail(registerDTO.getEmail()).orElse(null);
-		if (user != null && user.isActive()) {
+		if (user != null) {
 			throw new BadRequestException(1201, "Email has already existed");
 		} else if (!registerDTO.getEmail().toLowerCase().matches(
 				"^[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?")) {
@@ -87,7 +87,7 @@ public class UserServiceImpl implements UserService {
 		}
 
 		User userCheckUsername = userRepository.findByUsername(registerDTO.getUsername());
-		if (userCheckUsername != null && userCheckUsername.isActive()) {
+		if (userCheckUsername != null) {
 			throw new BadRequestException(1001, "Username has already existed");
 		} else if (!registerDTO.getUsername().matches("^(?=[a-zA-Z0-9._]{4,20}$)(?!.*[_.]{2})[^_.].*[^_.]$")) {
 			throw new BadRequestException(1003,
@@ -356,10 +356,10 @@ public class UserServiceImpl implements UserService {
 	@Override
 	public void updateActive(String username, UpdateActiveUserRequest activeUserDTO) {
 		if (!userRepository.existsByUsername(username)) {
-			throw new BadRequestException(1302, "account has not login");
+			throw new BadRequestException(1302, "Tài khoản ch được đăng nhập");
 		}
 		if (!userRepository.existsByUsername(activeUserDTO.getUsername())) {
-			throw new NotFoundException(1002, "username has not existed");
+			throw new NotFoundException(1002, "Tên tài khoản không tồn tại");
 		}
 
 		User user = userRepository.findByUsername(activeUserDTO.getUsername());
@@ -388,7 +388,7 @@ public class UserServiceImpl implements UserService {
 			ex.printStackTrace();
 		}
 		if (userPackage == null) {
-			throw new NotFoundException(404, "User package  Không tồn tại");
+			throw new NotFoundException(404, "Sản phẩm Không tồn tại");
 		}
 
 		return userPackage;
@@ -396,6 +396,9 @@ public class UserServiceImpl implements UserService {
 
 	@Override
 	public void activeCourse(String code) {
+		if(code == null || code.length() ==0) {
+			throw new NotFoundException(404, "Vui lòng nhập mã kích hoạt");
+		}
 		OrderPackage orderPackage = null;
 		try {
 			orderPackage = orderPackageRepository.findByActivationKey(code);
@@ -403,9 +406,9 @@ public class UserServiceImpl implements UserService {
 			ex.printStackTrace();
 		}
 		if (orderPackage == null)
-			throw new NotFoundException(404, "Order package  Không tồn tại");
+			throw new NotFoundException(404, "Mã kích hoặt không chính xác");
 		if (orderPackage.isActivated())
-			throw new BadRequestException(400, "Package was active");
+			throw new BadRequestException(400, "Mã kích hoạt đã được sử dụng");
 
 		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 		String username = auth.getName();

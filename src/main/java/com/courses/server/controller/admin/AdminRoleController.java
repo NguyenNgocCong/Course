@@ -24,7 +24,7 @@ public class AdminRoleController {
     @PostMapping("/update")
     public ResponseEntity<?> updateRole(@Validated @RequestBody RoleRequest roleDTO) {
         userService.updateRole(roleDTO);
-        return ResponseEntity.ok(new MessageResponse("Update role success"));
+        return ResponseEntity.ok(new MessageResponse("Cập nhật role thành công"));
     }
 
     @GetMapping("/roles")

@@ -5,6 +5,7 @@ import lombok.Data;
 @Data
 public class FeedbackRequest {
     private String body;
+    private String email;
     private int vote;
     private Long expertId;
     private Long packageId;

@@ -104,7 +104,7 @@ public class ExpertController {
 		Authen.check();
 		expertService.create(req);
 
-		return ResponseEntity.ok(new MessageResponse("Create expert is success"));
+		return ResponseEntity.ok(new MessageResponse("Tạo giảng viên thành công"));
 	}
 
 	@PutMapping("/update")
@@ -116,7 +116,7 @@ public class ExpertController {
 		ExpertRequest req = mapper.readValue(data, ExpertRequest.class);
 		expertService.update(id, req, image);
 
-		return ResponseEntity.ok(new MessageResponse("Update expert is success"));
+		return ResponseEntity.ok(new MessageResponse("Cập nhật giảng viên thành công"));
 	}
 
 	@DeleteMapping("/delete")

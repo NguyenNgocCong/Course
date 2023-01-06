@@ -21,7 +21,7 @@ public interface OrderService {
 
     List<OrderPackage> store();
 
-    void createNoLogin(OrderRequest req);
+    void createNoLogin(OrderRequest req, HttpServletRequest request);
 
     void createAdmin(OrderRequestAdmin req, HttpServletRequest request);
 
@@ -39,7 +39,7 @@ public interface OrderService {
 
     void updateStatus(Long id, Integer status, HttpServletRequest request);
 
-    void pay(String code);
+    void pay(String code,HttpServletRequest request);
 
     Page<Order> getListOrderOffline(Integer status, String keyword, Pageable paging);
 

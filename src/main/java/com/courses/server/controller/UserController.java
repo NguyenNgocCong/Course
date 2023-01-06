@@ -51,7 +51,7 @@ public class UserController {
         Authen.check();
 
         userService.updateUser(id, auth.getName(), updateDTO);
-        return ResponseEntity.ok(new MessageResponse("Update info success"));
+        return ResponseEntity.ok(new MessageResponse("Cập nhật thông tin thành công"));
     }
 
     @PostMapping("/upload-avatar")
@@ -59,10 +59,10 @@ public class UserController {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         String username = auth.getName();
         if (username == null || username.equals("anonymousUser")) {
-            throw new BadRequestException(1302, "User has not login");
+            throw new BadRequestException(1302, "Người dùng chưa đăng nhập");
         }
         userService.updateAvatar(username, avatar);
-        return ResponseEntity.ok(new MessageResponse("Upload avatar success"));
+        return ResponseEntity.ok(new MessageResponse("Cập nhật ảnh địa diện thành công"));
     }
 
     @GetMapping("/info")
@@ -135,7 +135,7 @@ public class UserController {
         Authen.check();
         userService.activeCourse(code);
 
-        return ResponseEntity.ok(new MessageResponse("Active course is success"));
+        return ResponseEntity.ok(new MessageResponse("Kích hoạt khóa học thành công"));
     }
 
     @GetMapping("/list-my-class")

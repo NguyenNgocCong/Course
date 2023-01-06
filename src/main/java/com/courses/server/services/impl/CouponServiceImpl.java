@@ -2,11 +2,9 @@ package com.courses.server.services.impl;
 
 import com.courses.server.dto.request.CouponRequest;
 import com.courses.server.entity.Coupon;
-import com.courses.server.entity.Package;
 import com.courses.server.exceptions.BadRequestException;
 import com.courses.server.exceptions.NotFoundException;
 import com.courses.server.repositories.CouponRepository;
-import com.courses.server.repositories.PackageRepository;
 import com.courses.server.services.CouponService;
 import com.courses.server.utils.RandomCode;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,6 +44,8 @@ public class CouponServiceImpl implements CouponService {
         }
         if (req.getDiscountRate() != null)
             coupon.setDiscountRate(req.getDiscountRate());
+        if (req.getQuantity() != null)
+            coupon.setQuantity(req.getQuantity());
         if (req.getStatus() != null)
             coupon.setStatus(req.getStatus());
         if (req.getValidFrom() != null)
@@ -64,9 +64,8 @@ public class CouponServiceImpl implements CouponService {
             ex.printStackTrace();
         }
         if (coupon == null) {
-            throw new NotFoundException(404, "Coupon  Không tồn tại");
+            throw new NotFoundException(404, "Coupon Không tồn tại");
         }
-
         couponRepository.delete(coupon);
     }
 

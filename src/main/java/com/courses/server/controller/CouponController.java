@@ -27,7 +27,7 @@ public class CouponController {
         Authen.check();
         couponService.create(req);
 
-        return ResponseEntity.ok(new MessageResponse("Create coupon success"));
+        return ResponseEntity.ok(new MessageResponse("Tạo mã giảm giá thành công"));
     }
 
     @PutMapping("/update")
@@ -37,15 +37,16 @@ public class CouponController {
         Authen.check();
         couponService.update(id, req);
 
-        return ResponseEntity.ok(new MessageResponse("Update coupon success"));
+        return ResponseEntity.ok(new MessageResponse("Cập nhật mã giảm giá thành công"));
     }
 
     @DeleteMapping("/delete")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_SUPPORTER')")
     public ResponseEntity<?> delete(@RequestParam("id")Long id) {
         Authen.check();
         couponService.delete(id);
 
-        return ResponseEntity.ok(new MessageResponse("Delete coupon success"));
+        return ResponseEntity.ok(new MessageResponse("Xóa mã giảm giá thành công"));
     }
 
     @GetMapping("")

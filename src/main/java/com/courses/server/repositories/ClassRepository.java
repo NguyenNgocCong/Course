@@ -59,11 +59,9 @@ public interface ClassRepository extends JpaRepository<Class, Long> {
 
 	@Transactional
 	@Modifying
-	@Query(value = "update Class set status = 0 where date_to < NOW()", nativeQuery = true)
-	void checkEndPage();
-
-	@Transactional
-	@Modifying
-	@Query(value = "update Class set status = 1 where DATE(date_from) = DATE(NOW())", nativeQuery = true)
+	@Query(value = "update Class set status = 0 where DATE(date_from) <= DATE(NOW())", nativeQuery = true)
 	void checkStartPage();
+
+	@Query(value = "SELECT COUNT(*) FROM Class where NOW() >= date_from and NOW() <= date_to", nativeQuery = true)
+	long count_active_class();
 }

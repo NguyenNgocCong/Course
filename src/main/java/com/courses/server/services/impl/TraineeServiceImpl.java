@@ -56,16 +56,16 @@ public class TraineeServiceImpl implements TraineeService {
     public void create(TraineeRequest req, HttpServletRequest request) {
 
         if (req.getEmail() == null || req.getEmail().length() == 0) {
-            throw new NotFoundException(404, "Email  Không tồn tại");
+            throw new NotFoundException(404, "Vui lòng nhập email");
         }
         if (req.getFullname() == null || req.getFullname().length() == 0) {
-            throw new NotFoundException(404, "Full name  Không tồn tại");
+            throw new NotFoundException(404, "Vui lòng nhập họ và tên");
         }
         if (req.getPhone() == null || req.getPhone().length() == 0) {
-            throw new NotFoundException(404, "Phone  Không tồn tại");
+            throw new NotFoundException(404, "Vui lòng nhập số điện thoại");
         }
         if (req.getStatus() == null) {
-            throw new NotFoundException(404, "Status  Không tồn tại");
+            throw new NotFoundException(404, "Vui lòng nhập trạng thái");
         }
         User user = null;
         try {
@@ -79,7 +79,7 @@ public class TraineeServiceImpl implements TraineeService {
             user.setPassword(encoder.encode(pass));
             user.setFullname(req.getFullname());
             Setting userRole = settingRepository.findByValueAndType("ROLE_GUEST", 1)
-                    .orElseThrow(() -> new NotFoundException(404, "Error: Role  Không tồn tại"));
+                    .orElseThrow(() -> new NotFoundException(404, "Error: Role Không tồn tại"));
 
             user.setRole(userRole);
 
@@ -97,7 +97,7 @@ public class TraineeServiceImpl implements TraineeService {
             senderService.sendEmail(req.getEmail(), subject, content);
         }
         if (traineeRepository.checkClassExistTraniee(req.getClassId(), user.getId()).size() > 0) {
-            throw new NotFoundException(404, "Class exist for this trainee");
+            throw new NotFoundException(404, "Lớp học đã có học viên này");
         }
         Class aClass = null;
         try {
@@ -106,7 +106,7 @@ public class TraineeServiceImpl implements TraineeService {
             ex.printStackTrace();
         }
         if (aClass == null)
-            throw new NotFoundException(404, "Class  Không tồn tại");
+            throw new NotFoundException(404, "Lớp học Không tồn tại");
         Trainee trainee = new Trainee(user, req.getStatus(), req.getDropOutDate(), aClass);
         traineeRepository.save(trainee);
     }
@@ -121,7 +121,7 @@ public class TraineeServiceImpl implements TraineeService {
             ex.printStackTrace();
         }
         if (trainee == null) {
-            throw new NotFoundException(404, "Trainee  Không tồn tại");
+            throw new NotFoundException(404, "Học viên Không tồn tại");
         }
 
         if (req.getStatus() != null)
@@ -130,7 +130,7 @@ public class TraineeServiceImpl implements TraineeService {
             trainee.setDropOutDate(req.getDropOutDate());
         if (req.getClassId() != null) {
             if (traineeRepository.checkClassExistTraniee(req.getClassId(), req.getUserId()).size() > 0) {
-                throw new NotFoundException(404, "Class exist for this trainee");
+                throw new NotFoundException(404, "Lớp học đã tồn tại");
             }
             Class aClass = null;
             try {
@@ -139,7 +139,7 @@ public class TraineeServiceImpl implements TraineeService {
                 ex.printStackTrace();
             }
             if (aClass == null)
-                throw new NotFoundException(404, "Class  Không tồn tại");
+                throw new NotFoundException(404, "Lớp học Không tồn tại");
             trainee.setAClass(aClass);
         }
 
@@ -232,7 +232,7 @@ public class TraineeServiceImpl implements TraineeService {
             ex.printStackTrace();
         }
         if (trainee == null) {
-            throw new NotFoundException(404, "Trainee  Không tồn tại");
+            throw new NotFoundException(404, "Học viên Không tồn tại");
         }
 
         return trainee;

@@ -171,7 +171,7 @@ public class AdminAccountController {
 
 		userService.updateActive(username, activeUserDTO);
 
-		return ResponseEntity.ok(new MessageResponse("Update status user success"));
+		return ResponseEntity.ok(new MessageResponse("Cập nhật trạng thái"));
 	}
 
 	@GetMapping("/{id}")
@@ -179,7 +179,7 @@ public class AdminAccountController {
 	public ResponseEntity<?> findUserByUsername(@PathVariable("id") Long id) throws IOException {
 		User user = userRepository.findById(id).isPresent() ? userRepository.findById(id).get() : null;
 		if (user == null) {
-			throw new NotFoundException(404, "ID not found user");
+			throw new NotFoundException(404, "Id không tồn tại");
 		}
 		return ResponseEntity.ok(new UserDTO(user, true));
 	}
@@ -188,6 +188,6 @@ public class AdminAccountController {
 	@PreAuthorize("hasRole('ROLE_ADMIN')")
 	public ResponseEntity<?> updateUser(@RequestParam("id") Long id, @RequestBody UserUpdateRequest userUpdate) {
 		userService.updateUser(id, null, userUpdate);
-		return ResponseEntity.ok(new MessageResponse("Update user success"));
+		return ResponseEntity.ok(new MessageResponse("Cập nhật thông tin thành công"));
 	}
 }

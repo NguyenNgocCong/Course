@@ -34,28 +34,28 @@ public class OrderController {
         Authen.check();
         orderService.addProductOrder(req);
 
-        return ResponseEntity.ok(new MessageResponse("add product to cart success"));
+        return ResponseEntity.ok(new MessageResponse("Thêm sản phẩm khỏi giỏ hàng thành công"));
     }
 
     @DeleteMapping("/remove-from-cart")
     public ResponseEntity<?> removeFromCart(@RequestParam(name = "id", required = true) Long id) {
         Authen.check();
         orderService.deleteProductOrders(id);
-        return ResponseEntity.ok(new MessageResponse("delete product from cart success"));
+        return ResponseEntity.ok(new MessageResponse("Xóa sản phẩm khỏi giỏ hàng thành công"));
     }
 
     @DeleteMapping("/remove-order")
     public ResponseEntity<?> removexOrder(@RequestParam(name = "id", required = true) Long id) {
         Authen.check();
         orderService.deleteProductOrders(id, true);
-        return ResponseEntity.ok(new MessageResponse("delete order success"));
+        return ResponseEntity.ok(new MessageResponse("Hủy đơn hàng thành công"));
     }
 
     @DeleteMapping("/remove-product-from-order")
     public ResponseEntity<?> removeProductFromOrder(@RequestParam(name = "id", required = true) Long id) {
         Authen.check();
         orderService.deleteProductOrders(id, false);
-        return ResponseEntity.ok(new MessageResponse("delete product to order success"));
+        return ResponseEntity.ok(new MessageResponse("Xóa sản phẩm khỏi đơn hàng thành công"));
     }
 
     @GetMapping("/cart")
@@ -66,17 +66,17 @@ public class OrderController {
     }
 
     @PostMapping("/create")
-    public ResponseEntity<?> create(@RequestBody OrderRequest req) {
-        orderService.createNoLogin(req);
+    public ResponseEntity<?> create(@RequestBody OrderRequest req, HttpServletRequest request) {
+        orderService.createNoLogin(req, request);
 
-        return ResponseEntity.ok(new MessageResponse("Create order success"));
+        return ResponseEntity.ok(new MessageResponse("Tạo đơn hàng thanh công"));
     }
 
     @PostMapping("/createAdmin")
     public ResponseEntity<?> createAdmin(@RequestBody OrderRequestAdmin req, HttpServletRequest request) {
         orderService.createAdmin(req, request);
 
-        return ResponseEntity.ok(new MessageResponse("Create order success"));
+        return ResponseEntity.ok(new MessageResponse("Tạo đơn hàng thanh công"));
     }
 
     @PutMapping("/updateOrderAdmin")
@@ -84,7 +84,7 @@ public class OrderController {
             @RequestParam("id") Long id) {
         orderService.UpdateOrderAdmin(req, request, id);
 
-        return ResponseEntity.ok(new MessageResponse("Update order success"));
+        return ResponseEntity.ok(new MessageResponse("Cập nhật đơn hàng tahfnh công"));
     }
 
     @GetMapping("/admin")
@@ -184,16 +184,16 @@ public class OrderController {
         Authen.check();
         orderService.updateStatus(id, status, request);
 
-        return ResponseEntity.ok(new MessageResponse("Update status order success"));
+        return ResponseEntity.ok(new MessageResponse("Cập nhật đơn hàng thành công"));
     }
 
     @PutMapping("/pay")
-    public ResponseEntity<?> pay(@RequestParam("codeCoupon") String codeCoupon) {
+    public ResponseEntity<?> pay(@RequestParam("codeCoupon") String codeCoupon, HttpServletRequest request) {
         Authen.check();
 
-        orderService.pay(codeCoupon);
+        orderService.pay(codeCoupon, request);
 
-        return ResponseEntity.ok(new MessageResponse("pay in success"));
+        return ResponseEntity.ok(new MessageResponse("Đăng ký khóa học thành công"));
     }
 
     @GetMapping("/list-off")

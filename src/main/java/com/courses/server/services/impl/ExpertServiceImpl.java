@@ -14,12 +14,6 @@ import com.courses.server.services.FileService;
 import io.jsonwebtoken.io.IOException;
 import java.sql.Timestamp;
 import java.util.Date;
-
-import javax.persistence.Column;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.validation.constraints.NotEmpty;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -46,7 +40,7 @@ public class ExpertServiceImpl implements ExpertService {
 			ex.printStackTrace();
 		}
 		if (expert == null) {
-			throw new NotFoundException(404, "Expert  Không tồn tại!");
+			throw new NotFoundException(404, "Giảng viên Không tồn tại!");
 		}
 
 		return expert;

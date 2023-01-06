@@ -10,6 +10,8 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
+import javax.transaction.Transactional;
+
 @Repository
 public interface TraineeRepository extends JpaRepository<Trainee, Long> {
 //    Trainee findByUser(User user);
@@ -52,4 +54,12 @@ public interface TraineeRepository extends JpaRepository<Trainee, Long> {
     Page<Trainee> getListTraineeByClass(Long class_id, Pageable pageable);
 
     List<Trainee> findByUser(User user);
+
+    @Query(value = "SELECT COUNT(*) FROM trainee where status = 1", nativeQuery = true)
+    long count_active_trainee_off();
+
+    @Transactional
+    @Modifying
+    @Query(value = "update trainee set status = 0 where drop_out_date < DATE(NOW())", nativeQuery = true)
+    void checkEndPage();
 }
